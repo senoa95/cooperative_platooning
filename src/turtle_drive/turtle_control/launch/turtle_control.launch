@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+  <include file="$(find turtle_description)/launch/description.launch">
+    <arg name="is_sim" value="0"/>
+  </include>
+
+  <include file="$(find turtle_control)/launch/hardware.launch" />
+  <include file="$(find turtle_control)/launch/control.launch" />
+
+</launch>

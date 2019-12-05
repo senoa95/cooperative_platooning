@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<launch>
+
+  <rosparam command="load" file="$(find turtle_control)/config/control.yaml" />
+
+  <node name="base_controller_spawner" pkg="controller_manager" type="spawner" args="turtle_joint_publisher turtle_velocity_controller">
+
+    <rosparam>
+       odom_type: "imu"
+    </rosparam>
+
+  </node>
+
+</launch>

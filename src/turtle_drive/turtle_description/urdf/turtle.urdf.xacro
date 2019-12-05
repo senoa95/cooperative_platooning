@@ -1,0 +1,109 @@
+<?xml version="1.0"?>
+<!--
+Software License Agreement (BSD)
+
+\file      turtle.urdf.xacro
+\authors  Anthony Wagner based on work by Coleman Knabe <csknabe@gmail.com>, Paul Bovbel <pbovbel@clearpathrobotics.com>, Devon Ash <dash@clearpathrobotics.com>
+\copyright Copyright (c) 2015, Clearpath Robotics, Inc., All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that
+the following conditions are met:
+ * Redistributions of source code must retain the above copyright notice, this list of conditions and the
+   following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the
+   following disclaimer in the documentation and/or other materials provided with the distribution.
+ * Neither the name of Clearpath Robotics nor the names of its contributors may be used to endorse or promote
+   products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WAR-
+RANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, IN-
+DIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
+OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+<robot name="turtle_robot" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- Included URDF/XACRO Files -->
+  <xacro:include filename="$(find turtle_description)/urdf/decorations.urdf.xacro" />
+  <xacro:include filename="$(find turtle_description)/urdf/wheel.urdf.xacro" />
+
+  <property name="M_PI" value="3.14159"/>
+
+  <!-- Base Size -->
+  <property name="base_x_size" value="0.9" />
+  <property name="base_y_size" value="0.42" />
+  <property name="base_z_size" value="0.4" />
+  <property name="base_z_clearance" value="0.17" />
+
+  <!-- Wheel Mounting Positions -->
+  <xacro:property name="wheelbase" value="0.762" />
+  <xacro:property name="track" value="0.711" />
+  <xacro:property name="wheel_vertical_offset" value="0.0" />
+
+  <!-- Wheel Properties -->
+  <xacro:property name="wheel_length" value="0.127" />
+  <xacro:property name="wheel_radius" value="0.203" />
+
+  <xacro:macro name="turtle_robot">
+
+    <!-- Base link is the center of the robot's base on ground -->
+    <link name="base_link">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://turtle_description/meshes/rover_base_with_tread.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </visual>
+      <collision> <!--FIXME-->
+        <origin xyz="0 0 ${base_z_clearance/2+base_z_size/2}" rpy="0 0 0" />
+        <geometry>
+          <box size="${base_x_size} ${base_y_size} ${base_z_size-base_z_clearance}"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- Base footprint is on the ground under the robot -->
+    <link name="base_footprint"/>
+
+    <joint name="base_footprint_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <parent link="base_link" />
+      <child link="base_footprint" />
+    </joint>
+
+    <!-- Interial link stores the robot's inertial information -->
+    <link name="inertial_link"> <!--FIXME currently made up -->
+      <inertial>
+        <mass value="0.8" />
+        <origin xyz="0.0 0.0 0.035" />
+        <inertia ixx="0.1" ixy="-0.001" ixz="-0.001" iyy="0.3" iyz="-0.0001" izz="0.3" />
+      </inertial>
+    </link>
+
+    <joint name="inertial_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <parent link="base_link" />
+      <child link="inertial_link" />
+    </joint>
+
+
+    <!-- turtle wheel macros -->
+    <xacro:turtle_wheel wheel_prefix="front_left">
+      <origin xyz="${wheelbase/2} ${track/2} ${wheel_radius}" rpy="0 0 0" />
+    </xacro:turtle_wheel>
+    <xacro:turtle_wheel wheel_prefix="front_right">
+      <origin xyz="${wheelbase/2} ${-track/2} ${wheel_radius}" rpy="0 0 0" />
+    </xacro:turtle_wheel>
+    <xacro:turtle_wheel wheel_prefix="rear_left">
+      <origin xyz="${-wheelbase/2} ${track/2} ${wheel_radius}" rpy="0 0 0" />
+    </xacro:turtle_wheel>
+    <xacro:turtle_wheel wheel_prefix="rear_right">
+      <origin xyz="${-wheelbase/2} ${-track/2} ${wheel_radius}" rpy="0 0 0" />
+    </xacro:turtle_wheel>
+
+<!--    <xacro:turtle_decorate /> FIXME if we want to put tracks as a decoration rather than part of base-->
+
+  </xacro:macro>
+</robot>

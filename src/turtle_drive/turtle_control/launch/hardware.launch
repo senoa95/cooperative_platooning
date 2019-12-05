@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<launch>
+ <node name="turtle_control" pkg="turtle_control" type="turtle_base"/>
+
+<node pkg="roboteq_driver" type="driver_node" name="roboteq_driver" output="screen">
+    <rosparam>
+        port: /dev/ttyACM0
+        baud: 115200
+        channels: [left, right]
+    </rosparam>
+</node>
+</launch>

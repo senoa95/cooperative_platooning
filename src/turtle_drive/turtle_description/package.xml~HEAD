@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package>
+  <name>turtle_description</name>
+  <version>0.0.1</version>
+  <description>turtle slip/steer URDF description used for Turtle robotic platform in DYSMAC</description>
+
+  <maintainer email="wagnera@vt.edu">Anthony Wagner</maintainer>
+
+  <license>BSD 3-Clause</license>
+
+  <url type="website">https://github.com/wagnera/Turtles</url>
+
+  <author email="wagnera@vt.edu">Anthony Wagner</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <run_depend>robot_state_publisher</run_depend>
+  <run_depend>urdf</run_depend>
+  <run_depend>xacro</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>roslaunch</run_depend>
+
+</package>
