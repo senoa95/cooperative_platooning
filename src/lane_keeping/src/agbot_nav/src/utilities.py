@@ -119,7 +119,7 @@ class PPController:
         # print (" Desired Theta = ", theta_des)
 
         # Compute forward velocity:
-        vel = 2
+        vel = 5
 
         return vel,delta
 

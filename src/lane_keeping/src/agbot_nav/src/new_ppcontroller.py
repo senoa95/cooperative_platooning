@@ -6,7 +6,8 @@ import math
 from geometry_msgs.msg import Point32,Pose
 from agbot_nav.msg import lane
 from utilities import Point, AckermannVehicle , PPController, DiffDriveVehicle
-import transforms3d as tf
+import transforms3d
+import tf
 import numpy as np
 import os
 import rospkg
@@ -47,8 +48,10 @@ def pose_callback(data):
     currentPos.x = data.position.x
     currentPos.y = data.position.y
 
-    euler = tf.euler.quat2euler([data.orientation.x,data.orientation.y,data.orientation.z,data.orientation.w])
-    currentPos.heading = euler[0]
+    euler = tf.transformations.euler_from_quaternion([data.orientation.x,data.orientation.y, data.orientation.z, data.orientation.w])
+    print(euler)
+    # currentPos.
+    currentPos.heading = euler[2]
     
 def lane_callback(data):
 
@@ -73,7 +76,6 @@ def compute_waypoints_from_laneparams():
 
     # compute lane points ahead of the vehicle
     for distIdx in range(minDist,numPoint):
-        print( dist)
         dist = dist + step
         wpList.append(Point(dist + currentPos.x , 0.16667*laneParams.rhoDot*np.power(dist,3) + 0.5*laneParams.rho*np.power(dist,2) + laneParams.phi*dist + laneParams.y + currentPos.y))
 
@@ -83,7 +85,7 @@ def get_waypoints_from_file(file_name):
     
     global currentPos
     global wpList
-    
+   
     fileLoc = os.path.join(rospack.get_path("agbot_nav"),"src",file_name)
     wpFile = open(fileLoc, 'r')
     wPts = wpFile.readlines()
@@ -100,8 +102,8 @@ def initialize():
 
     global file_name
     # Create objects for AckermannVehicle and Pure Pursuit controller:
-    # wpList = get_waypoints_from_file(file_name)
-    wpList = compute_waypoints_from_laneparams()
+    wpList = get_waypoints_from_file(file_name)
+    # wpList = compute_waypoints_from_laneparams()
     mule = DiffDriveVehicle(0.455,0.0,0.195,3)
     cntrl = PPController(0,mule.length,mule.minTurningRadius,mule.maximumVelocity)
     cntrl.initialize(wpList)
@@ -117,7 +119,8 @@ def execute(cntrl):
     # Setup the ROS publishers and subscribers:
     rospy.Subscriber("laneParams", lane, lane_callback)
     rospy.Subscriber("/pr2/local/Pose", Pose, pose_callback)
-    pub = rospy.Publisher('/pr2/cmd_vel', Point32, queue_size =10)
+    pub_cmd = rospy.Publisher('/pr2/cmd_vel', Point32, queue_size =10)
+    pub_rpy = rospy.Publisher('/pr2/rpy', Point32, queue_size=10)
     pub_goal = rospy.Publisher('/current_goalpoint',Point32,queue_size=10)
     rospy.init_node('ppcontroller', anonymous=True)
 
@@ -127,7 +130,7 @@ def execute(cntrl):
     cntrl = initialize()
 
     # 1. Parameters:
-    threshold = 1
+    threshold = 0.5
     euclideanError = 0
 
     # 2. Points:
@@ -155,16 +158,18 @@ def execute(cntrl):
 
         # Compute the new Euclidean error:
         current_goalPoint = Point32(goalPoint.x,goalPoint.y,0)
+        # print(current_goalPoint)
+        
         # current_goalPoint = [str(goalPoint.x),str(goalPoint.y),'0']
         pub_goal.publish(current_goalPoint)
-
+        pub_rpy.publish(Point32(0,0,currentPos.heading))
         euclideanError = math.sqrt((math.pow((goalPoint.x-currentPos.x),2) + math.pow((goalPoint.y-currentPos.y),2)))
    
         # Case #1:Vehicle is in the vicinity of current goal point (waypoint):
         if (euclideanError < threshold):
 
             # Make the AckermannVehicle stop where it is
-            pub.publish(stationaryCommand)
+            pub_cmd.publish(stationaryCommand)
 
             print (" Reached Waypoint # ", cntrl.currWpIdx +1)
             # Update goal Point to next point in the waypoint list:
@@ -173,6 +178,7 @@ def execute(cntrl):
             print(cntrl.nPts)
             if cntrl.currWpIdx < cntrl.nPts:
                 goalPoint = cntrl.wpList[cntrl.currWpIdx + 1]
+                current_goalPoint = Point32(goalPoint.x,goalPoint.y,0)
 
             else:
 
@@ -197,7 +203,7 @@ def execute(cntrl):
             command.y = delta
             
             # Publish the computed command:
-            pub.publish(command)
+            pub_cmd.publish(command)
 
             # Recompute the Euclidean error to see if its reducing:
             euclideanError = math.sqrt((math.pow((goalPoint.x-currentPos.x),2) + math.pow((goalPoint.y-currentPos.y),2)))
