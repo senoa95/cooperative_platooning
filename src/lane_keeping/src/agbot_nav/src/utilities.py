@@ -80,7 +80,13 @@ class PPController:
             nVecMag = np.sqrt( normX**2 + normY**2)
 
             self.segNormVecList[0,idx+1] = normX/nVecMag
+            # print(normX)
+            # print(nVecMag)
             self.segNormVecList[1,idx+1] = normY/nVecMag
+            # print(normY)
+            # print(nVecMag)
+            
+
 
         self.tgtHeading[0] = self.tgtHeading[1]
         self.segNormVecList[:,0] = self.segNormVecList[:,1]
@@ -95,6 +101,8 @@ class PPController:
 
         # Compute the minimum distance from the current segment:
         minDist = np.dot(vecRobot2Wp.T, self.segNormVecList[:,self.currWpIdx])
+        a = self.segNormVecList[:,:]
+        b = self.currWpIdx
         theta_gain = self.k_theta * minDist
         if theta_gain > math.pi/2:
             theta_gain = math.pi/2
@@ -117,6 +125,10 @@ class PPController:
         # print(" Target heading = ", self.tgtHeading[self.currWpIdx] )
         # print (" Current heading = " , current.heading)
         # print (" Desired Theta = ", theta_des)
+        # print("theta gain = ", theta_gain)
+        # print("minDist = ", minDist)
+        # print("vecRobot2Wp = ", vecRobot2Wp)
+
 
         # Compute forward velocity:
         vel = 5
