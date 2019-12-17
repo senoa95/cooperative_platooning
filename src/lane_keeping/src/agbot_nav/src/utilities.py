@@ -80,14 +80,33 @@ class PPController:
             nVecMag = np.sqrt( normX**2 + normY**2)
 
             self.segNormVecList[0,idx+1] = normX/nVecMag
-            # print(normX)
-            # print(nVecMag)
             self.segNormVecList[1,idx+1] = normY/nVecMag
-            # print(normY)
-            # print(nVecMag)
+
+        self.tgtHeading[0] = self.tgtHeading[1]
+        self.segNormVecList[:,0] = self.segNormVecList[:,1]
+
+    def update(self, wpList, wpUpdate):
+      
+        self.wpList = wpUpdate
+        self.nPts = len(wpList)
+        self.segNormVecList = np.zeros((2,self.nPts))
+
+        self.tgtHeading.append(0)
+
+        # Loop to compute the target heading values:
+        for idx in range(0, len(self.wpList)-1):
+
+            self.tgtHeading.append( math.atan2( self.wpList[idx + 1].y - self.wpList[idx].y , self.wpList[idx+1].x - self.wpList[idx].x))
+
+            normX = self.wpList[idx].y - self.wpList[idx + 1].y
+            normY = self.wpList[idx + 1].x - self.wpList[idx].x
+
+            # Calculate the norm:
+            nVecMag = np.sqrt( normX**2 + normY**2)
+
+            self.segNormVecList[0,idx+1] = normX/nVecMag
+            self.segNormVecList[1,idx+1] = normY/nVecMag
             
-
-
         self.tgtHeading[0] = self.tgtHeading[1]
         self.segNormVecList[:,0] = self.segNormVecList[:,1]
 
@@ -108,6 +127,9 @@ class PPController:
             theta_gain = math.pi/2
         if theta_gain < -math.pi/2:
             theta_gain = -math.pi/2
+
+        currentGoal_x = self.wpList[self.currWpIdx].x
+        currentGoal_y = self.wpList[self.currWpIdx].y
 
         # Compute the desired heading angle based of target heading and the min dist:
         theta_des = self.tgtHeading[self.currWpIdx] + theta_gain
