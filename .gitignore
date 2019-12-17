@@ -1,2 +1,4 @@
 build/*
 devel/*
+src/lane_keeping/src/agbot_nav/src/*.pyc
+.vscode

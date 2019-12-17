@@ -46,12 +46,16 @@ file_name = "waypoints_normalized_0.txt"
 
 
 def ros_init():
+    global pub_goal_debug
+    global pub_goal_debug1
 
      # Setup the ROS publishers and subscribers:
     rospy.Subscriber("laneParams", lane, lane_callback)
     rospy.Subscriber("/pr2/local/Pose", Pose, pose_callback)
     rospy.Subscriber("/pr2/start", Bool, sim_start_callback)
     rospy.init_node('ppcontroller', anonymous=True)
+    pub_goal_debug = rospy.Publisher('/current_goalpoint',Point32,queue_size=10)
+    pub_goal_debug1 = rospy.Publisher('/current_goalpoint_one',Point32,queue_size=10)
 
 def sim_start_callback(data):
     global simStart
@@ -79,46 +83,54 @@ def lane_callback(data):
     laneParams.phi = data.phi
     laneParams.y = data.y
 
-def compute_waypoints_from_laneparams(initialDist, signX, signY):
+def compute_waypoints_from_laneparams(update, currentGoalPoint):
 
     global laneParams
     global wpList
     global currentPos
+    global pub_goal_debug
+    global pub_goal_debug1
 
     step = 0.5
     numPoint = 20
-    dist = initialDist
+    dist = 0
     wpList = []  
 
-
-    zero_x = currentPos.x
-    zero_y = currentPos.y
+    if update:
+        zero_x = currentGoalPoint.x
+        zero_y = currentGoalPoint.y
+    else:
+        zero_x = currentPos.x
+        zero_y = currentPos.y
 
 
     # compute lane points ahead of the vehicle
     for distIdx in range(0,numPoint):
         wpYorigin = 0.16667*laneParams.rhoDot*numpy.power(dist,3) + 0.5*laneParams.rho*numpy.power(dist,2) + laneParams.phi*dist + laneParams.y
         currPoint = numpy.array([dist, wpYorigin])
-        # if currentPos.heading > numpy.pi / 2:
         heading = currentPos.heading
             
 
-        rotationMtrx = numpy.array([[numpy.cos(heading), numpy.sin(heading)], [-numpy.sin(heading), numpy.cos(heading)]])
-        rotated_point = numpy.dot(currPoint, rotationMtrx)
-        # print(rotated_point)
-        # raw_input()
-        # alpha = numpy.arctan2(wpYorigin, dist)
-        # beta = currentPos.heading + alpha
-        wpX = rotated_point[0] + currentPos.x
-        wpY = rotated_point[1] + currentPos.y
-        wpList.append(Point(signX*wpX, signY*wpY))
+        rotationMtrx = numpy.array([[numpy.cos(heading), -numpy.sin(heading)], [numpy.sin(heading), numpy.cos(heading)]])
+        # rotated_point_ = numpy.dot(currPoint, rotationMtrx)
+        rotated_point = numpy.matmul(rotationMtrx,currPoint)
+        # print('rotated b', rotated_point_b)    
+
+        wpX = -rotated_point[0] + zero_x
+        wpY = -rotated_point[1] + zero_y
+        wpList.append(Point(wpX, wpY))
 
         print('original Points', dist, wpYorigin)
-        print('goalPoint',wpX, wpY)
+        print('rotated point', rotated_point)    
+        print('current pose', currentPos.x, currentPos.y, heading)
+        print('goalPoint', wpX, wpY)
         print('getting new list')
         dist = dist + step
     print('rotation matrix', rotationMtrx)
-    print('current pose', currentPos.x, currentPos.y, heading)
+    current_goalPoint = Point32(wpList[5].x, wpList[5].y, 0)
+    current_goalPoint1 = Point32(wpList[10].x, wpList[10].y, 0)
+    pub_goal_debug.publish(current_goalPoint)
+    pub_goal_debug1.publish(current_goalPoint1)
     
     # raw_input()
     return(wpList)
@@ -180,7 +192,7 @@ def execute(cntrl):
         if firstPoint:
             #find first waypoint
             cntrl.currWpIdx = 0
-            wpList = compute_waypoints_from_laneparams(0,-1, -1)
+            wpList = compute_waypoints_from_laneparams(False, 0)
             cntrl.initialize(wpList)
             goalPoint = cntrl.wpList[cntrl.currWpIdx]
             firstPoint = False
@@ -228,7 +240,7 @@ def execute(cntrl):
                 print('update goal')
                 # # Update goal Point to next point in the waypoint list:
                 # Compute a new list of waypoints
-                wpList = compute_waypoints_from_laneparams(0, 1,1)
+                wpList = compute_waypoints_from_laneparams(True, cntrl.wpList[cntrl.currWpIdx + 2])
                 cntrl.initialize(wpList)
                 
                 cntrl.currWpIdx = 0
