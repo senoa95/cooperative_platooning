@@ -36,6 +36,7 @@ class PPController:
         self.length = inputLength #set the length for ppcontroller as the length of maximumSteeringAngle
         self.turningRadius = inputMinTurningRadius
         self.maximumVelocity = inputMaximumVelocity
+        self.prevHeadingErr = 0
 
         # List of waypoints: From start to end:
         self.wpList = []
@@ -53,9 +54,11 @@ class PPController:
         self.nPts = 0
 
         # Tuning gains:
-        self.k_theta = 1
+        self.k_theta = 2.5
 
-        self.k_delta = 1.0
+        self.k_delta_p = 3.0
+        self.k_delta_i = 0.5
+        self.k_delta_d = 3.0
 
         self.k_vel = 0.1
 
@@ -138,11 +141,22 @@ class PPController:
             heading_err = heading_err - 2*math.pi
         elif heading_err < -math.pi:
             heading_err = heading_err + 2*math.pi
-        delta = self.k_delta*(heading_err)
+
+        deltaHeadingErr = heading_err - self.prevHeadingErr
+
+
+        delta_p = self.k_delta_p*heading_err
+        delta_i = self.k_delta_i*(heading_err + self.prevHeadingErr)
+        delta_d = self.k_delta_d*(heading_err - self.prevHeadingErr)
+
+        self.prevHeadingErr = heading_err
+
+        delta = delta_p + delta_i + delta_d
                 
         # Debugging section:
         # print('delta =', delta)
-        # print('heading error', heading_err)
+        print('previous heading error', self.prevHeadingErr)
+        print('heading error', heading_err)
         # print (" Minimum Dist = ", minDist)
         # print(" Target heading = ", self.tgtHeading[self.currWpIdx] )
         # print (" Current heading = " , current.heading)
