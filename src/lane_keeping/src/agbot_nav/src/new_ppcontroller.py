@@ -167,30 +167,17 @@ def execute(cntrl):
     pub_goal_four = rospy.Publisher('/current_goalpoint_four',Point32,queue_size=10)
     pub_cmd = rospy.Publisher('/pr2/cmd_vel', Point32, queue_size =10)
 
-    # # 2. Points:
-    # goalPoint = cntrl.wpList[cntrl.currWpIdx]
-
-    # # 3. Commands:
-    # command = Point32()
-    # stationaryCommand = Point32()
-
-    # stationaryCommand.x = 0
-    # stationaryCommand.y = 0
-
-
-    # #initialize the new waypoints
-    # cntrl.initialize(wpList)
-
-
-
     firstPoint = True
     shortGoal = 0
+    count = 0
+    prevDeltaEuclideanError = 0
 
     # Loop through as long as the node is not shutdown:
     while not rospy.is_shutdown():   
 
         if firstPoint:
             #find first waypoint
+            prevEuclideanError = 10000000000000
             cntrl.currWpIdx = 0
             wpList = compute_waypoints_from_laneparams(False, 0)
             cntrl.initialize(wpList)
@@ -217,11 +204,41 @@ def execute(cntrl):
 
             # Recompute the Euclidean error to see if its reducing:
             euclideanError = math.sqrt((math.pow((goalPoint.x-currentPos.x),2) + math.pow((goalPoint.y-currentPos.y),2)))
+            
+            deltaEuclideanError = euclideanError - prevDeltaEuclideanError + deltaEuclideanError
+            print('delta euclidean error', deltaEuclideanError)
+
+            if numpy.absolute(deltaEuclideanError) > 1:
+                print('Warning, off course')
+                if numpy.absolute(deltaEuclideanError) > 2.5:
+                    print('Vehicle off track, please reset')
+                    # # Stationary Command
+                    command = Point32()
+                    stationaryCommand = Point32()
+
+                    stationaryCommand.x = 0
+                    stationaryCommand.y = 0
+                    pub_cmd.publish(stationaryCommand)
+                    quit()
+
+            prevDeltaEuclideanError = deltaEuclideanError
+
+            # print('abs previous euclidean error', numpy.absolute(prevEuclideanError))
+            # print('abs euclidean error', numpy.absolute(euclideanError))
+
+            # print('previous euclidean error', prevEuclideanError)
+            # prevEuclideanError = euclideanError
+            # print('euclidean error', euclideanError)
+            
+
+
             # print('euclidean error', euclideanError)
             # print('current pose', currentPos.x, currentPos.y)
             # print('goalPoint',goalPoint.x, goalPoint.y)
         
         elif euclideanError < threshold:
+            count = 0
+            deltaEuclideanError = 0
             
             if shortGoal < 5 and moreLane == True:
 

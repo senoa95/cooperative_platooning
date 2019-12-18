@@ -1,4 +1,4 @@
-import numpy as np
+import numpy
 import math
 import utm
 
@@ -56,9 +56,9 @@ class PPController:
         # Tuning gains:
         self.k_theta = 2.5
 
-        self.k_delta_p = 3.0
-        self.k_delta_i = 0.5
-        self.k_delta_d = 3.0
+        self.k_delta_p = 1.0
+        self.k_delta_i = 0.1
+        self.k_delta_d = 1.5
 
         self.k_vel = 0.1
 
@@ -67,49 +67,24 @@ class PPController:
       
         self.wpList = wpList
         self.nPts = len(wpList)
-        self.segNormVecList = np.zeros((2,self.nPts))
+        self.segNormVecList = numpy.zeros((2,self.nPts))
 
         self.tgtHeading.append(0)
 
         # Loop to compute the target heading values:
         for idx in range(0, len(self.wpList)-1):
 
-            self.tgtHeading.append( math.atan2( self.wpList[idx + 1].y - self.wpList[idx].y , self.wpList[idx+1].x - self.wpList[idx].x))
+            self.tgtHeading.append( numpy.arctan2( self.wpList[idx + 1].y - self.wpList[idx].y , self.wpList[idx+1].x - self.wpList[idx].x))
 
             normX = self.wpList[idx].y - self.wpList[idx + 1].y
             normY = self.wpList[idx + 1].x - self.wpList[idx].x     #bug might live here
 
             # Calculate the norm:
-            nVecMag = np.sqrt( normX**2 + normY**2)
+            nVecMag = numpy.sqrt( normX**2 + normY**2)
 
             self.segNormVecList[0,idx+1] = normX/nVecMag
             self.segNormVecList[1,idx+1] = normY/nVecMag
 
-        self.tgtHeading[0] = self.tgtHeading[1]
-        self.segNormVecList[:,0] = self.segNormVecList[:,1]
-
-    def update(self, wpList, wpUpdate):
-      
-        self.wpList = wpUpdate
-        self.nPts = len(wpList)
-        self.segNormVecList = np.zeros((2,self.nPts))
-
-        self.tgtHeading.append(0)
-
-        # Loop to compute the target heading values:
-        for idx in range(0, len(self.wpList)-1):
-
-            self.tgtHeading.append( math.atan2( self.wpList[idx + 1].y - self.wpList[idx].y , self.wpList[idx+1].x - self.wpList[idx].x))
-
-            normX = self.wpList[idx].y - self.wpList[idx + 1].y
-            normY = self.wpList[idx + 1].x - self.wpList[idx].x
-
-            # Calculate the norm:
-            nVecMag = np.sqrt( normX**2 + normY**2)
-
-            self.segNormVecList[0,idx+1] = normX/nVecMag
-            self.segNormVecList[1,idx+1] = normY/nVecMag
-            
         self.tgtHeading[0] = self.tgtHeading[1]
         self.segNormVecList[:,0] = self.segNormVecList[:,1]
 
@@ -117,12 +92,12 @@ class PPController:
     def compute_steering_vel_cmds(self,current):
 
         # Compute vector from current position to current waypoint:
-        vecRobot2Wp = np.zeros((2,1))
+        vecRobot2Wp = numpy.zeros((2,1))
         vecRobot2Wp[0,0] =  self.wpList[self.currWpIdx].x - current.x
         vecRobot2Wp[1,0] =  self.wpList[self.currWpIdx].y - current.y
 
         # Compute the minimum distance from the current segment:
-        minDist = np.dot(vecRobot2Wp.T, self.segNormVecList[:,self.currWpIdx])
+        minDist = numpy.dot(vecRobot2Wp.T, self.segNormVecList[:,self.currWpIdx])
         a = self.segNormVecList[:,:]
         b = self.currWpIdx
         theta_gain = self.k_theta * minDist
@@ -155,8 +130,8 @@ class PPController:
                 
         # Debugging section:
         # print('delta =', delta)
-        print('previous heading error', self.prevHeadingErr)
-        print('heading error', heading_err)
+        # print('previous heading error', self.prevHeadingErr)
+        # print('heading error', heading_err)
         # print (" Minimum Dist = ", minDist)
         # print(" Target heading = ", self.tgtHeading[self.currWpIdx] )
         # print (" Current heading = " , current.heading)
@@ -167,7 +142,7 @@ class PPController:
 
 
         # Compute forward velocity:
-        vel = 5
+        vel = 1
 
         return vel,delta
 
