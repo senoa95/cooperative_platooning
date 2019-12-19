@@ -89,7 +89,7 @@ class PPController:
         self.segNormVecList[:,0] = self.segNormVecList[:,1]
 
     # Function to compute steering angle and forward velocity commands:
-    def compute_steering_vel_cmds(self,current):
+    def compute_steering_vel_cmds(self,current, maxVel):
 
         # Compute vector from current position to current waypoint:
         vecRobot2Wp = numpy.zeros((2,1))
@@ -127,6 +127,8 @@ class PPController:
         self.prevHeadingErr = heading_err
 
         delta = delta_p + delta_i + delta_d
+
+        vel = maxVel
                 
         # Debugging section:
         # print('delta =', delta)
@@ -139,11 +141,6 @@ class PPController:
         # print("theta gain = ", theta_gain)
         # print("minDist = ", minDist)
         # print("vecRobot2Wp = ", vecRobot2Wp)
-
-
-        # Compute forward velocity:
-        vel = 1
-
         return vel,delta
 
     # compute the steering radius of ackerman vehicle of given parameters

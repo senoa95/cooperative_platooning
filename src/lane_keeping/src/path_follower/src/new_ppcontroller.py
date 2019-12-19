@@ -3,8 +3,8 @@
 # Import libraries:
 import rospy
 import math
-from std_msgs.msg import Bool
-from geometry_msgs.msg import Point32,Pose
+from std_msgs.msg import Bool,Float32
+from geometry_msgs.msg import Point32,Pose,Twist
 from agbot_nav.msg import lane
 from utilities import Point, AckermannVehicle , PPController, DiffDriveVehicle
 import transforms3d
@@ -25,6 +25,7 @@ global file_name
 global laneParams
 global wpList
 global simStart
+global maxVel
 
 wpList = []
 currentPos = Point()
@@ -37,6 +38,7 @@ laneParams.phi = 0
 laneParams.y = 0
 trial = 0
 simStart = False
+maxVel = 3
 
 wpList.append(Point(currentPos.x, currentPos.y))
 wpList.append(Point(currentPos.x, currentPos.y))
@@ -51,8 +53,9 @@ def ros_init():
 
      # Setup the ROS publishers and subscribers:
     rospy.Subscriber("laneParams", lane, lane_callback)
-    rospy.Subscriber("/pr2/local/Pose", Pose, pose_callback)
+    rospy.Subscriber("/pr2/pose", Pose, pose_callback)
     rospy.Subscriber("/pr2/start", Bool, sim_start_callback)
+    rospy.Subscriber("/maxVel",Float32, max_vel_callback )
     rospy.init_node('ppcontroller', anonymous=True)
     pub_goal_debug = rospy.Publisher('/current_goalpoint',Point32,queue_size=10)
     pub_goal_debug1 = rospy.Publisher('/current_goalpoint_one',Point32,queue_size=10)
@@ -61,6 +64,11 @@ def sim_start_callback(data):
     global simStart
 
     simStart = data.data
+
+def max_vel_callback(data):
+    global maxVel
+
+    maxVel = data.data
 
 # Callback function for subscriber to Position and orientation topic:
 def pose_callback(data):
@@ -165,7 +173,7 @@ def execute(cntrl):
     pub_goal_two = rospy.Publisher('/current_goalpoint_two',Point32,queue_size=10)
     pub_goal_three = rospy.Publisher('/current_goalpoint_three',Point32,queue_size=10)
     pub_goal_four = rospy.Publisher('/current_goalpoint_four',Point32,queue_size=10)
-    pub_cmd = rospy.Publisher('/pr2/cmd_vel', Point32, queue_size =10)
+    pub_cmd = rospy.Publisher('/pr2/cmd_vel', Twist, queue_size =10)
 
     firstPoint = True
     shortGoal = 0
@@ -186,18 +194,18 @@ def execute(cntrl):
             getNextPoints = False
 
 
-        pub_rpy.publish(Point32(0,0,currentPos.heading))
+        pub_rpy.publish(Point32(currentPos.x,currentPos.y,currentPos.heading))
         euclideanError = math.sqrt((math.pow((goalPoint.x-currentPos.x),2) + math.pow((goalPoint.y-currentPos.y),2)))
    
         # Case #1:Vehicle is in the vicinity of current goal point (waypoint):
         if (euclideanError > threshold):
 
             # Compute steering and velocity commands according to Dr L controller
-            vel, delta = cntrl.compute_steering_vel_cmds(currentPos)
+            vel, delta = cntrl.compute_steering_vel_cmds(currentPos, maxVel)
 
-            command = Point32()
-            command.x = vel
-            command.y = delta
+            command = Twist()
+            command.linear.x = vel
+            command.angular.z = delta
             
             # Publish the computed command:
             pub_cmd.publish(command)
@@ -206,15 +214,14 @@ def execute(cntrl):
             euclideanError = math.sqrt((math.pow((goalPoint.x-currentPos.x),2) + math.pow((goalPoint.y-currentPos.y),2)))
             
             deltaEuclideanError = euclideanError - prevDeltaEuclideanError + deltaEuclideanError
-            print('delta euclidean error', deltaEuclideanError)
 
             if numpy.absolute(deltaEuclideanError) > 1:
-                print('Warning, off course')
+                print('Warning, vehicle possibly off course')
                 if numpy.absolute(deltaEuclideanError) > 2.5:
-                    print('Vehicle off track, please reset')
+                    print('Vehicle off course, please reset')
                     # # Stationary Command
-                    command = Point32()
-                    stationaryCommand = Point32()
+                    command = Twist()
+                    stationaryCommand = Twist()
 
                     stationaryCommand.x = 0
                     stationaryCommand.y = 0
@@ -264,38 +271,6 @@ def execute(cntrl):
                 goalPoint = cntrl.wpList[cntrl.currWpIdx]
                 current_goalPoint = Point32(goalPoint.x,goalPoint.y,0)
                 shortGoal = 0
-
-            # if shortGoal == 20 and moreLane == True:
-
-            #     # cntrl.currWpIdx = 0                
-            #     # print('clearing wp of size', len(wpList))
-            #     # time.sleep(10)
-            #     # wpList = []
-            #     print('more points :()')
-            #     wpList = compute_waypoints_from_laneparams(False)
-                
-                
-            #     # Make the AckermannVehicle stop where it is
-            #     # wpList = compute_waypoints_from_laneparams(firstPoint, goalPoint)
-            #     # cntrl.initialize(wpList)
-                
-            #     print (" New goal is: ")
-            #     getNextPoints = True
-
-
-            # elif moreLane == False:
-
-            #     pub_cmd.publish(stationaryCommand)
-            #     print (" --- All Waypoints have been conquered! Mission Accomplished Mr Hunt !!! --- ")
-            #     break
-
-
-        #initialize the new waypoints
-        # cntrl.initialize(wpList)
-
-        # find the waypoints
-        # cntrl.currWpIdx = 0
-
 
         current_goalPoint = Point32(goalPoint.x,goalPoint.y,0)
         pub_goal.publish(current_goalPoint)
