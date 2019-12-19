@@ -1,0 +1,6 @@
+# These are the tunning params for the lane keeping controller for the turtles
+gains:
+  theta = 2.5
+  delta_p = 1.0
+  delta_i = 0.1
+  delta_d = 1.5

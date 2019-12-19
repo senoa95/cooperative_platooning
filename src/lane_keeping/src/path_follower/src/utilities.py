@@ -53,15 +53,6 @@ class PPController:
         # Number of waypoints:
         self.nPts = 0
 
-        # Tuning gains:
-        self.k_theta = 2.5
-
-        self.k_delta_p = 1.0
-        self.k_delta_i = 0.1
-        self.k_delta_d = 1.5
-
-        self.k_vel = 0.1
-
     # Initialize the controller from a text file containing the waypoints:
     def initialize(self, wpList):
       
@@ -89,7 +80,14 @@ class PPController:
         self.segNormVecList[:,0] = self.segNormVecList[:,1]
 
     # Function to compute steering angle and forward velocity commands:
-    def compute_steering_vel_cmds(self,current, maxVel):
+    def compute_steering_vel_cmds(self,current, maxVel, gains):
+
+        ros_rate = 0.1 #running at 10Hz
+
+        k_theta = gains['k_theta']
+        k_delta_p = gains['k_delta_p']
+        k_delta_i = gains['k_delta_i']
+        k_delta_d = gains['k_delta_d']
 
         # Compute vector from current position to current waypoint:
         vecRobot2Wp = numpy.zeros((2,1))
@@ -97,10 +95,10 @@ class PPController:
         vecRobot2Wp[1,0] =  self.wpList[self.currWpIdx].y - current.y
 
         # Compute the minimum distance from the current segment:
-        minDist = numpy.dot(vecRobot2Wp.T, self.segNormVecList[:,self.currWpIdx])
+        minDist = numpy.matmul(vecRobot2Wp.T, self.segNormVecList[:,self.currWpIdx])
         a = self.segNormVecList[:,:]
         b = self.currWpIdx
-        theta_gain = self.k_theta * minDist
+        theta_gain = k_theta * minDist
         if theta_gain > math.pi/2:
             theta_gain = math.pi/2
         if theta_gain < -math.pi/2:
@@ -120,9 +118,9 @@ class PPController:
         deltaHeadingErr = heading_err - self.prevHeadingErr
 
 
-        delta_p = self.k_delta_p*heading_err
-        delta_i = self.k_delta_i*(heading_err + self.prevHeadingErr)
-        delta_d = self.k_delta_d*(heading_err - self.prevHeadingErr)
+        delta_p = k_delta_p*heading_err
+        delta_i = k_delta_i*(heading_err + self.prevHeadingErr * ros_rate)
+        delta_d = k_delta_d*(heading_err - self.prevHeadingErr) / ros_rate
 
         self.prevHeadingErr = heading_err
 

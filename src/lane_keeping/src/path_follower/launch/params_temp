@@ -1,0 +1,4 @@
+gains/theta: 2.5
+gains/delta_p: 1.0
+gains/delta_i: 0.1
+gains/delta_d: 1.5

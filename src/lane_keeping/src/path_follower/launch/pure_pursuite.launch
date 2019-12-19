@@ -1,5 +1,5 @@
-<?xml version="1.0"?>
 <launch>
-  <node name="pure_pursuite" pkg="agbot_nav" type="new_ppcontroller.py"/>
-  <param name="file_name" value="dummy_wp.txt"/>
+  <node name="path_finder" pkg="path_follower" type="new_ppcontroller.py">
+      <!-- <rosparam command="load" file="lane_keeping.yaml" /> -->
+  </node>
 </launch>

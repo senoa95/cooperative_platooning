@@ -5,7 +5,7 @@ import rospy
 import math
 from std_msgs.msg import Bool,Float32
 from geometry_msgs.msg import Point32,Pose,Twist
-from agbot_nav.msg import lane
+from path_follower.msg import lane
 from utilities import Point, AckermannVehicle , PPController, DiffDriveVehicle
 import transforms3d
 import tf
@@ -157,16 +157,31 @@ def initialize():
 def execute(cntrl):
 
     global currentPos
-
+    stationaryCommand = Twist()
+    stationaryCommand.linear.x = 0
+    stationaryCommand.angular.z = 0
     rate = rospy.Rate(10)
 
+    # Tuning gains:
+    k_theta = rospy.get_param("gains/theta")
+    k_delta_p = rospy.get_param("gains/delta_p")
+    k_delta_i = rospy.get_param("gains/delta_i")
+    k_delta_d = rospy.get_param("gains/delta_d")
+    # print(a)
 
-    # Initialize:
-    # cntrl = initialize()
+    # k_theta = 2.5
+    # k_delta_p = 1.0
+    # k_delta_i = 0.1
+    # k_delta_d = 1.5
+
+    gains = {'k_theta':k_theta,'k_delta_p':k_delta_p, 'k_delta_i':k_delta_i, 'k_delta_d':k_delta_d}
+
 
     # 1. Parameters:
     threshold = 0.5
     euclideanError = 0
+
+    # Publishers
     pub_rpy = rospy.Publisher('/pr2/rpy', Point32, queue_size=10)
     pub_goal = rospy.Publisher('/current_goalpoint',Point32,queue_size=10)
     pub_goal_one = rospy.Publisher('/current_goalpoint_one',Point32,queue_size=10)
@@ -201,7 +216,7 @@ def execute(cntrl):
         if (euclideanError > threshold):
 
             # Compute steering and velocity commands according to Dr L controller
-            vel, delta = cntrl.compute_steering_vel_cmds(currentPos, maxVel)
+            vel, delta = cntrl.compute_steering_vel_cmds(currentPos, maxVel, gains)
 
             command = Twist()
             command.linear.x = vel
@@ -221,10 +236,6 @@ def execute(cntrl):
                     print('Vehicle off course, please reset')
                     # # Stationary Command
                     command = Twist()
-                    stationaryCommand = Twist()
-
-                    stationaryCommand.x = 0
-                    stationaryCommand.y = 0
                     pub_cmd.publish(stationaryCommand)
                     quit()
 
