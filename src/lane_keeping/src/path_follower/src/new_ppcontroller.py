@@ -161,22 +161,7 @@ def execute(cntrl):
     stationaryCommand.linear.x = 0
     stationaryCommand.angular.z = 0
     rate = rospy.Rate(10)
-
-    # Tuning gains:
-    k_theta = rospy.get_param("gains/theta")
-    k_delta_p = rospy.get_param("gains/delta_p")
-    k_delta_i = rospy.get_param("gains/delta_i")
-    k_delta_d = rospy.get_param("gains/delta_d")
-    # print(a)
-
-    # k_theta = 2.5
-    # k_delta_p = 1.0
-    # k_delta_i = 0.1
-    # k_delta_d = 1.5
-
-    gains = {'k_theta':k_theta,'k_delta_p':k_delta_p, 'k_delta_i':k_delta_i, 'k_delta_d':k_delta_d}
-
-
+   
     # 1. Parameters:
     threshold = 0.5
     euclideanError = 0
@@ -197,6 +182,15 @@ def execute(cntrl):
 
     # Loop through as long as the node is not shutdown:
     while not rospy.is_shutdown():   
+
+
+        # Tuning gains:
+        k_theta = rospy.get_param("gains/theta")
+        k_delta_p = rospy.get_param("gains/delta_p")
+        k_delta_i = rospy.get_param("gains/delta_i")
+        k_delta_d = rospy.get_param("gains/delta_d")
+
+        gains = {'k_theta':k_theta,'k_delta_p':k_delta_p, 'k_delta_i':k_delta_i, 'k_delta_d':k_delta_d}
 
         if firstPoint:
             #find first waypoint
