@@ -71,7 +71,7 @@ class PPController:
             normY = self.wpList[idx + 1].x - self.wpList[idx].x     #bug might live here
 
             # Calculate the norm:
-            nVecMag = numpy.sqrt( normX**2 + normY**2)
+            nVecMag = numpy.sqrt(numpy.power(normX,2) + numpy.power(normY,2))
 
             self.segNormVecList[0,idx+1] = normX/nVecMag
             self.segNormVecList[1,idx+1] = normY/nVecMag
@@ -100,9 +100,9 @@ class PPController:
         b = self.currWpIdx
         theta_gain = k_theta * minDist
         if theta_gain > math.pi/2:
-            theta_gain = math.pi/2
-        if theta_gain < -math.pi/2:
-            theta_gain = -math.pi/2
+            theta_gain = theta_gain - math.pi
+        elif theta_gain < -math.pi/2:
+            theta_gain = theta_gain + math.pi
 
         currentGoal_x = self.wpList[self.currWpIdx].x
         currentGoal_y = self.wpList[self.currWpIdx].y
@@ -139,7 +139,7 @@ class PPController:
         # print("theta gain = ", theta_gain)
         # print("minDist = ", minDist)
         # print("vecRobot2Wp = ", vecRobot2Wp)
-        return vel,delta
+        return vel,delta,heading_err,theta_des
 
     # compute the steering radius of ackerman vehicle of given parameters
     def compute_turning_radius(self, current = Point(0,0,0) , goal = Point(0,0,0)):

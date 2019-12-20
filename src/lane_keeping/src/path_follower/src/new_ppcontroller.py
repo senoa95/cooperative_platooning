@@ -124,8 +124,8 @@ def compute_waypoints_from_laneparams(update, currentGoalPoint):
         rotated_point = numpy.matmul(rotationMtrx,currPoint)
         # print('rotated b', rotated_point_b)    
 
-        wpX = -rotated_point[0] + zero_x
-        wpY = -rotated_point[1] + zero_y
+        wpX = rotated_point[0] + zero_x
+        wpY = rotated_point[1] + zero_y
         wpList.append(Point(wpX, wpY))
 
         print('original Points', dist, wpYorigin)
@@ -174,6 +174,9 @@ def execute(cntrl):
     pub_goal_three = rospy.Publisher('/current_goalpoint_three',Point32,queue_size=10)
     pub_goal_four = rospy.Publisher('/current_goalpoint_four',Point32,queue_size=10)
     pub_cmd = rospy.Publisher('/pr2/cmd_vel', Twist, queue_size =10)
+    pub_des_heading = rospy.Publisher('/pr2/desired_heading',Float32, queue_size=10)
+    pub_heading_err = rospy.Publisher('/pr2/heading_error',Float32, queue_size=10)
+
 
     firstPoint = True
     shortGoal = 0
@@ -210,7 +213,7 @@ def execute(cntrl):
         if (euclideanError > threshold):
 
             # Compute steering and velocity commands according to Dr L controller
-            vel, delta = cntrl.compute_steering_vel_cmds(currentPos, maxVel, gains)
+            vel, delta, headingErr, desHeading = cntrl.compute_steering_vel_cmds(currentPos, maxVel, gains)
 
             command = Twist()
             command.linear.x = vel
@@ -218,6 +221,8 @@ def execute(cntrl):
             
             # Publish the computed command:
             pub_cmd.publish(command)
+            pub_heading_err.publish(headingErr)
+            pub_des_heading.publish(desHeading)
 
             # Recompute the Euclidean error to see if its reducing:
             euclideanError = math.sqrt((math.pow((goalPoint.x-currentPos.x),2) + math.pow((goalPoint.y-currentPos.y),2)))
