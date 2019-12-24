@@ -18,6 +18,10 @@ sensor = monoCamera(camIntrinsics, height, 'Pitch', pitch);
 %% initialize matlab ros node
 Ts = 0.1;
 PredictionHorizon = 2;
+% center_curvature_derivative.Data = 0;
+% center_curvature.Data = 0;
+% center_relative_yaw_angle.Data = 0; 
+% center_lateral_deviation.Data = 0;
 
 if ros.internal.Global.isNodeActive == 0
     rosinit
@@ -31,12 +35,12 @@ msg = sub.receive;
 frame = msg.readImage;
 
 %% specify lane detection parameters
-distAheadOfSensor = 30; % in meters, as previously specified in monoCamera height input
-spaceToOneSide    = 8;  % all other distance quantities are also in meters
-bottomOffset      = 1;
+distAheadOfSensor = 55; % in meters, as previously specified in monoCamera height input
+spaceToOneSide    = 10;  % all other distance quantities are also in meters
+bottomOffset      = 2;
 
 outView   = [bottomOffset, distAheadOfSensor, -spaceToOneSide, spaceToOneSide]; % [xmin, xmax, ymin, ymax]
-imageSize = [NaN, 250]; % output image width in pixels; height is chosen automatically to preserve units per pixel ratio
+imageSize = [NaN, 640]; % output image width in pixels; height is chosen automatically to preserve units per pixel ratio
 
 %% transform image
 birdsEyeConfig = birdsEyeView(sensor, outView, imageSize);
@@ -48,7 +52,7 @@ birdsEyeImage = rgb2gray(birdsEyeImage);
 
 % Lane marker segmentation ROI in world units
 vehicleROI = outView - [0, 0, -0.85, 0.85]; % look 3 meters to left and right, and 4 meters ahead of the sensor
-approxLaneMarkerWidthVehicle = 0.5; % 25 centimeters
+approxLaneMarkerWidthVehicle = 0.15; % centimeters
 
 %% detect lane 
 % Detect lane features
@@ -137,10 +141,10 @@ if isempty(leftEgoBoundary)
 %         pack left lane values with zeros. Set strength to 0.
         disp('left lane not detected')
         left_strength = -100;
-        left_curvature_rate = 0;
-        left_curvature = 0;
-        left_relative_yaw_angle = 0;
-        left_lateral_deviation = 0;
+        left_curvature_rate = 100;
+        left_curvature = 100;
+        left_relative_yaw_angle = 100;
+        left_lateral_deviation = 100;
     else
 %         if both left and right lanes not detected continue
         disp('no lanes detected. continuing')
@@ -177,18 +181,20 @@ else
 %         pack right lane values with zeros. Set strength to 0.
         disp('right lane not detected')
         right_strength = -100;
-        right_curvature_rate = 0;
-        right_curvature = 0;
-        right_relative_yaw_angle = 0;
-        right_lateral_deviation = 0;
+        right_curvature_rate = 100;
+        right_curvature = 100;
+        right_relative_yaw_angle = 100;
+        right_lateral_deviation = 100;
     end
 end
+
+%     [birdsEyeWithEgoLane,frameWithEgoLane] = showLanes(birdsEyeImage,leftEgoBoundary,leftEgoBoundary,rightEgoBoundary,birdsEyeConfig,bottomOffset,distAheadOfSensor,frame,sensor);
 
 % if ~isempty(leftEgoBoundary) || ~isempty(rightEgoBoundary)
 
     sim('estimate_lane_center.slx')
     centerEgoBoundary.Parameters(1) = mean(center_curvature_derivative.Data);
-    centerEgoBoundary.Parameters(2) = mean(center_curvature.Data(1:3));
+    centerEgoBoundary.Parameters(2) = mean(center_curvature.Data(1,:));
     centerEgoBoundary.Parameters(3) = mean(center_relative_yaw_angle.Data);
     centerEgoBoundary.Parameters(4) = mean(center_lateral_deviation.Data);
     disp('CENTER lane params')
