@@ -257,7 +257,7 @@ def execute(cntrl):
             count = 0
             deltaEuclideanError = 0
             
-            if shortGoal < 5 and moreLane == True:
+            if shortGoal < 2 and moreLane == True:
 
                 cntrl.currWpIdx +=1
                 
