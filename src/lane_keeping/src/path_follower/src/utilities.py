@@ -60,7 +60,7 @@ class PPController:
         self.nPts = len(wpList)
         self.segNormVecList = numpy.zeros((2,self.nPts))
 
-        self.tgtHeading.append(0)
+        self.tgtHeading  = []
 
         # Loop to compute the target heading values:
         for idx in range(0, len(self.wpList)-1):

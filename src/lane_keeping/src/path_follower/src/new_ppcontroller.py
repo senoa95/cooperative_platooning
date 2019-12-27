@@ -274,7 +274,7 @@ def execute(cntrl):
                 print('update goal')
                 # # Update goal Point to next point in the waypoint list:
                 # Compute a new list of waypoints
-                wpList = compute_waypoints_from_laneparams(True, cntrl.wpList[cntrl.currWpIdx + 2])
+                wpList = compute_waypoints_from_laneparams(True, cntrl.wpList[cntrl.currWpIdx + 1])
                 cntrl.initialize(wpList)
                 
                 cntrl.currWpIdx = 0
