@@ -106,100 +106,10 @@ void TurtleHardware::publishDriveFromController()
   left_msg.setpoint = (2*cmd_vel_msg_.linear.x - L*cmd_vel_msg_.angular.z)/2;
   right_msg.setpoint = (2*cmd_vel_msg_.linear.x + L*cmd_vel_msg_.angular.z)/2;
 
-	left_msg.setpoint=(-joints_[0].velocity_command)*.9091*20;
-	right_msg.setpoint=(joints_[3].velocity_command)*.9091*20;
+	// left_msg.setpoint=(-joints_[0].velocity_command)*.9091*20;
+	// right_msg.setpoint=(joints_[3].velocity_command)*.9091*20;
   left_motor_pub.publish(left_msg);
   right_motor_pub.publish(right_msg);
-}
-
-
-void TurtleHardware::publishDriveFromMath()
-{
-	roboteq_msgs::Command left_msg;
-  roboteq_msgs::Command right_msg;
-  double curr_time = ros::Time::now().toSec();
-  double prev_time;
-  float des_vel;
-  float xVel_err;
-  float xVel;
-  float prev_xVel_err;
-  float thetaDot_err;
-  float prev_thetaDot_err;
-  float xVel_err_diff;
-  float thetaDot_err_diff;
-  float xVel_err_sum;
-  float thetaDot_err_sum;
-  float cmd_lin_vel;
-  float cmd_ang_vel;
-
-
-
-  int yaw_rate = 20;
-  double L = 0.7; //0.7 meters wheel separation
-  double R = 0.41; //0.41 meter diameter
-  double del_time = curr_time - prev_time;
-
-  float kp_lin_vel = 1000;
-  float ki_lin_vel = 0;
-  float kd_lin_vel = 0;
-
-  float kp_ang_vel = 1000;
-  float ki_ang_vel = 0;
-  float kd_ang_vel = 0;
-
-  float thetaDot = corrimudata_msg_.yaw_rate * yaw_rate;
-  float des_xVel = cmd_vel_msg_.linear.x;
-  float des_thetaDot = cmd_vel_msg_.angular.z;
-
-  // Calculate the linear velocity from odometry
-  xVel = (((2*R*joints_[1].velocity - thetaDot*L) / 2) + ((2*R*joints_[0].velocity + thetaDot*L) / 2))/2;
-
-  // Compute the linear and angular velocity error
-  xVel_err = des_xVel - xVel;
-  thetaDot_err = des_thetaDot - thetaDot;
-  // Compute the linear and angular velocity error differential
-  xVel_err_diff = xVel_err - prev_xVel_err;
-  thetaDot_err_diff = thetaDot_err - prev_thetaDot_err;
-  // Compute the error integral
-  xVel_err_sum = xVel_err_sum + xVel_err;
-  thetaDot_err_sum = thetaDot_err_sum + thetaDot_err;
-
-  // Compute the linear velocity command
-  cmd_lin_vel = kp_lin_vel*xVel_err + ki_lin_vel*xVel_err_sum + kd_lin_vel*xVel_err_diff;
-  // Compute the angular velocity command
-  cmd_ang_vel = kp_ang_vel*thetaDot_err + ki_ang_vel*thetaDot_err_sum + kd_ang_vel*thetaDot_err_diff;
-
-  left_msg.mode=0;
-  right_msg.mode=0;
-  // set left and right wheel velocities based in
-	left_msg.setpoint= -(2*cmd_lin_vel + cmd_ang_vel*L) / (2*R);
-	right_msg.setpoint= (2*cmd_lin_vel + cmd_ang_vel*L) / (2*R);;
-  left_motor_pub.publish(left_msg);
-  right_motor_pub.publish(right_msg);
-}
-
-void TurtleHardware::corrimudataCallback(const novatel_gps_msgs::NovatelCorrectedImuData msg)
-{
-  // Update the feedback message pointer to point to the current message. Block
-  // until the control thread is not using the lock.
-  boost::mutex::scoped_lock corrimu_lock(corrimudata_msg_mutex_);
-  corrimudata_msg_ = msg;
-}
-
-void TurtleHardware::inspvaCallback(const novatel_gps_msgs::Inspva msg)
-{
-  // Update the feedback message pointer to point to the current message. Block
-  // until the control thread is not using the lock.
-  boost::mutex::scoped_lock inspva_lock(inspva_data_msg_mutex_);
-  inspva_data_msg_ = msg;
-}
-
-void TurtleHardware::insstdevCallback(const novatel_gps_msgs::Insstdev msg)
-{
-  // Update the feedback message pointer to point to the current message. Block
-  // until the control thread is not using the lock.
-  boost::mutex::scoped_lock inscov_lock(insstdev_data_msg_mutex_);
-  insstdev_data_msg_ = msg;
 }
 
 void TurtleHardware::feedbackCallback_left(const roboteq_msgs::Feedback msg)

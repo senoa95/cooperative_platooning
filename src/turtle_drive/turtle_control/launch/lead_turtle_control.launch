@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<launch>
+
+ <arg name="is_sim" default="0" />
+<remap from="/tf" to="/lead/tf" />
+<remap from="/tf_static" to="/lead/tf_static" />
+<remap from="/joint_states" to="/lead/joint_states" />
+<param name="robot_description" command="$(find xacro)/xacro.py '$(find turtle_description)/urdf/description.xacro'" unless="$(arg is_sim)"/>
+<param name="robot_description" command="$(find xacro)/xacro.py '$(find turtle_description)/urdf/turtle.gazebo.xacro'" if="$(arg is_sim)"/>
+
+<node name="lead_spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -model turtle" />
+<node name="lead_robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+
+<remap from="/left/cmd" to="/lead/left/cmd" />
+<remap from="/right/cmd" to="/lead/right/cmd" />
+<remap from="/left/feedback" to="/lead/left/feedback" />
+<remap from="/right/feedback" to="/lead/right/feedback" />
+<remap from="/turtle_velocity_controller/cmd_vel" to="/lead/turtle_velocity_controller/cmd_vel" />
+<remap from="/turtle_velocity_controller/odom" to="/lead/turtle_velocity_controller/odom" />
+<remap from="/turtle_velocity_controller/parameter_descriptions" to="/lead/turtle_velocity_controller/parameter_descriptions" />
+<remap from="/turtle_velocity_controller/parameter_updates" to="/lead/turtle_velocity_controller/parameter_updates" />
+<remap from="/tf" to="/lead/tf" />
+
+<node name="lead_turtle_control" pkg="turtle_control" type="turtle_base" />
+
+<node pkg="roboteq_driver" type="driver_node" name="lead_roboteq_driver" output="screen">
+    <rosparam>
+        port: /dev/ttyACM0
+        baud: 115200
+        channels: [left, right]
+    </rosparam>
+</node>
+
+
+<remap from="/tf" to="/lead/tf" />
+<rosparam command="load" file="$(find turtle_control)/config/control.yaml" />
+
+  <node name="lead_base_controller_spawner" pkg="controller_manager" type="spawner" args="turtle_joint_publisher turtle_velocity_controller">
+
+    <rosparam>
+       odom_type: "imu"
+    </rosparam>
+
+  </node>
+
+</launch>
