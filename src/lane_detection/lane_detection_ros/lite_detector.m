@@ -3,9 +3,15 @@ clear
 clc
 
 %% initialize camara intrinsics
-% focalLength = cameraParams.FocalLength;
-% principalPoint = cameraParams.PrincipalPoint;
-% imageSize = cameraParams.ImageSize;
+% focalLength = cameraParams.FocalLength
+% principalPoint = cameraParams.PrincipalPoint
+% imageSize = cameraParams.ImageSize
+
+% focalLength = [94.0798, 94.8510];
+% principalPoint = [321.4176, 159.4088];
+
+
+
 focalLength = [637.8722,637.0641];
 principalPoint = [323.5977,239.8220];
 imageSize      = [480, 640];  
@@ -27,6 +33,18 @@ if ros.internal.Global.isNodeActive == 0
     rosinit
 end
 
+meanCounter = 0;
+
+mean_right_curvature_rate = 0;
+mean_right_curvature = 0;
+mean_right_relative_yaw_angle = 0;
+mean_right_lateral_deviation = 0;
+
+mean_left_curvature_rate = 0;
+mean_left_curvature = 0;
+mean_left_relative_yaw_angle = 0;
+mean_left_lateral_deviation = 0;
+    
 while true
 %% subscribe to compressed camera image
 cam_topic = '/usb_cam/image_raw/compressed';
@@ -148,7 +166,7 @@ if isempty(leftEgoBoundary)
     else
 %         if both left and right lanes not detected continue
         disp('no lanes detected. continuing')
-        [birdsEyeWithEgoLane,frameWithEgoLane] = showLanes(birdsEyeImage,leftEgoBoundary,leftEgoBoundary,rightEgoBoundary,birdsEyeConfig,bottomOffset,distAheadOfSensor,frame,sensor);
+        [birdsEyeWithEgoLane,frameWithEgoLane] = showLanes(birdsEyeImage,leftEgoBoundary,rightEgoBoundary,birdsEyeConfig,bottomOffset,distAheadOfSensor,frame,sensor);
     %     clear centerEgoBoundary
         subplot('Position', [0, 0, 0.5, 1.0]) % [left, bottom, width, height] in normalized units
         imshow(birdsEyeWithEgoLane)
@@ -188,24 +206,89 @@ else
     end
 end
 
+
+meanCounter = meanCounter + 1;
+meanRange = 5;
+rightMeanCounter = 0;
+leftMeanCounter = 0;
+
+if meanCounter == meanRange
+    meanCounter = 0;
 %     [birdsEyeWithEgoLane,frameWithEgoLane] = showLanes(birdsEyeImage,leftEgoBoundary,leftEgoBoundary,rightEgoBoundary,birdsEyeConfig,bottomOffset,distAheadOfSensor,frame,sensor);
 
 % if ~isempty(leftEgoBoundary) || ~isempty(rightEgoBoundary)
-
-    sim('estimate_lane_center.slx')
-    centerEgoBoundary.Parameters(1) = mean(center_curvature_derivative.Data);
-    centerEgoBoundary.Parameters(2) = mean(center_curvature.Data(1,:));
-    centerEgoBoundary.Parameters(3) = mean(center_relative_yaw_angle.Data);
-    centerEgoBoundary.Parameters(4) = mean(center_lateral_deviation.Data);
-    disp('CENTER lane params')
-    disp(centerEgoBoundary.Parameters)
+        
+    computeCenter = 0;
     
-    [birdsEyeWithEgoLane,frameWithEgoLane] = showLanes(birdsEyeImage,leftEgoBoundary,centerEgoBoundary,rightEgoBoundary,birdsEyeConfig,bottomOffset,distAheadOfSensor,frame,sensor);
-%     clear centerEgoBoundary
-    subplot('Position', [0, 0, 0.5, 1.0]) % [left, bottom, width, height] in normalized units
-    imshow(birdsEyeWithEgoLane)
-    subplot('Position', [0.5, 0, 0.5, 1.0])
-    imshow(frameWithEgoLane)
+    if rightMeanCounter > 1 && ~isempty(rightEgoBoundary)
+        rightEgoBoundary.Parameters(1) = mean_right_curvature_rate/meanRange;
+        rightEgoBoundary.Parameters(2) = mean_right_curvature/meanRange;
+        rightEgoBoundary.Parameters(3) = mean_right_relative_yaw_angle/meanRange;
+        rightEgoBoundary.Parameters(4) = mean_right_lateral_deviation/meanRange;
+    end
+    
+    if leftMeanCounter > 1 && ~isempty(leftEgoBoundary)
+        leftEgoBoundary.Parameters(1) = mean_left_curvature_rate/meanRange;
+        leftEgoBoundary.Parameters(2) = mean_left_curvature/meanRange;
+        leftEgoBoundary.Parameters(3) = mean_left_relative_yaw_angle/meanRange;
+        leftEgoBoundary.Parameters(4) = mean_left_lateral_deviation/meanRange;
+    end
+    
+    if computeCenter
+        sim('estimate_lane_center.slx')
+        centerEgoBoundary.Parameters(1) = mean(center_curvature_derivative.Data);
+        centerEgoBoundary.Parameters(2) = mean(center_curvature.Data(1,:));
+        centerEgoBoundary.Parameters(3) = mean(center_relative_yaw_angle.Data);
+        centerEgoBoundary.Parameters(4) = mean(center_lateral_deviation.Data);
+        disp('CENTER lane params')
+        disp(centerEgoBoundary.Parameters)
+
+        [birdsEyeWithEgoLane,frameWithEgoLane] = showLanesWithCenter(birdsEyeImage,leftEgoBoundary,centerEgoBoundary,rightEgoBoundary,birdsEyeConfig,bottomOffset,distAheadOfSensor,frame,sensor);
+    %     clear centerEgoBoundary
+        subplot('Position', [0, 0, 0.5, 1.0]) % [left, bottom, width, height] in normalized units
+        imshow(birdsEyeWithEgoLane)
+        subplot('Position', [0.5, 0, 0.5, 1.0])
+        imshow(frameWithEgoLane)
+    else
+        [birdsEyeWithEgoLane,frameWithEgoLane] = showLanes(birdsEyeImage,leftEgoBoundary,rightEgoBoundary,birdsEyeConfig,bottomOffset,distAheadOfSensor,frame,sensor);
+        subplot('Position', [0, 0, 0.5, 1.0]) % [left, bottom, width, height] in normalized units
+        imshow(birdsEyeWithEgoLane)
+        subplot('Position', [0.5, 0, 0.5, 1.0])
+        imshow(frameWithEgoLane)
+    end
+    
+    mean_right_curvature_rate = 0;
+    mean_right_curvature = 0;
+    mean_right_relative_yaw_angle = 0;
+    mean_right_lateral_deviation = 0;
+    
+    mean_left_curvature_rate = 0;
+    mean_left_curvature = 0;
+    mean_left_relative_yaw_angle = 0;
+    mean_left_lateral_deviation = 0;
+    
+    rightMeanCounter = 0;
+    rightMeanCounter = 0;      
+    
+else
+    if ~isempty(rightEgoBoundary)
+    mean_right_curvature_rate = mean_right_curvature_rate + right_curvature_rate;
+    mean_right_curvature = mean_right_curvature + right_curvature;
+    mean_right_relative_yaw_angle = mean_right_relative_yaw_angle + right_relative_yaw_angle;
+    mean_right_lateral_deviation = mean_right_lateral_deviation + right_lateral_deviation;
+    rightMeanCounter = rightMeanCounter + 1;
+    end
+    
+    if ~isempty(leftEgoBoundary)
+    mean_left_curvature_rate = mean_left_curvature_rate + right_curvature_rate;
+    mean_left_curvature = mean_left_curvature + right_curvature;
+    mean_left_relative_yaw_angle = mean_left_relative_yaw_angle + right_relative_yaw_angle;
+    mean_left_lateral_deviation = mean_left_lateral_deviation + right_lateral_deviation;
+    leftMeanCounter = leftMeanCounter + 1;
+    end
+end
+
+        
     
 % else
 %     continue
@@ -213,7 +296,17 @@ end
 end
 %% supporting functions
 
-function [birdsEyeWithEgoLane,frameWithEgoLane] =showLanes(birdsEyeImage,leftEgoBoundary,centerEgoBoundary,rightEgoBoundary,birdsEyeConfig,bottomOffset,distAheadOfSensor,frame,sensor)
+function [birdsEyeWithEgoLane,frameWithEgoLane] =showLanes(birdsEyeImage,leftEgoBoundary,rightEgoBoundary,birdsEyeConfig,bottomOffset,distAheadOfSensor,frame,sensor)
+
+xVehiclePoints = bottomOffset:distAheadOfSensor;
+birdsEyeWithEgoLane = insertLaneBoundary(birdsEyeImage, leftEgoBoundary , birdsEyeConfig, xVehiclePoints, 'Color','Red');
+birdsEyeWithEgoLane = insertLaneBoundary(birdsEyeWithEgoLane, rightEgoBoundary, birdsEyeConfig, xVehiclePoints, 'Color','Green');
+
+frameWithEgoLane = insertLaneBoundary(frame, leftEgoBoundary, sensor, xVehiclePoints, 'Color','Red');
+frameWithEgoLane = insertLaneBoundary(frameWithEgoLane, rightEgoBoundary, sensor, xVehiclePoints, 'Color','Green');
+end
+
+function [birdsEyeWithEgoLane,frameWithEgoLane] =showLanesWithCenter(birdsEyeImage,leftEgoBoundary,centerEgoBoundary,rightEgoBoundary,birdsEyeConfig,bottomOffset,distAheadOfSensor,frame,sensor)
 
 xVehiclePoints = bottomOffset:distAheadOfSensor;
 birdsEyeWithEgoLane = insertLaneBoundary(birdsEyeImage, leftEgoBoundary , birdsEyeConfig, xVehiclePoints, 'Color','Red');
