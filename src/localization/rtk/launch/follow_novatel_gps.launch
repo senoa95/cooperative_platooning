@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<launch>
+  <node name="follow_novatel"
+        pkg="nodelet" type="nodelet"
+        args="standalone novatel_gps_driver/novatel_gps_nodelet" >
+    <rosparam>
+      verbose: true
+      connection_type: serial
+      device: /dev/ttyUSB2
+      publish_novatel_positions: true
+      frame_id: world_frame
+      use_binary_messages: true
+      imu_rate: 20
+      imu_frame_id: base_link
+      publish_imu_messages: true
+      publish_novatel_velocity: true
+    </rosparam>
+    <remap from="bestpos" to="/follow/bestpos"/>
+    <remap from="bestvel" to="/follow//bestvel"/>
+    <remap from="corrimudata" to="/follow/corrimudata"/>
+    <remap from="diagnostics" to="/follow/diagnostics"/>
+    <remap from="fix" to="/follow/fix"/>
+    <remap from="gps" to="/follow/gps"/>
+    <remap from="gps_sync" to="/follow/gps_sync"/>
+    <remap from="imu" to="/follow/imu"/>
+    <remap from="inscov" to="/follow/inscov"/>
+    <remap from="inspva" to="/follow/inspva"/>
+    <remap from="inspvax" to="/follow/inspvax"/>
+    <remap from="insstdev" to="/follow/insstdev"/>
+  </node>
+</launch>
