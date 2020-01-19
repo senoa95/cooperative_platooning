@@ -3,7 +3,7 @@
 close all
 clearvars  -except loaded_leader_allData loaded_follower_allData
 distanceThresh = 0.8;
-ws_DIR = 'Y:\My Documents\Truck Pairing\Lateral Control\Simulation Tools\Working Matlab Synthetic Driving Scenarios\Data\';
+ws_DIR = '/home/senoa95/coop_paltoon/src/automated_driving_toolbox_sim_tools/Working Matlab Synthetic Driving Scenarios/Data';
 %Scene: S-Shape = 's'
 %Scene: Right Turn = 'right_turn'
 %Scene: Straight = 'straight'
@@ -160,20 +160,19 @@ end
 %heading angle to the same lane when accounting for longitudinal headway.
 
 relativeHeading = sent.sentGlobalHeading_leader - unifiedStruct.globalOrientation.Yaw.followerValues;
-% relativeHeading = deg2rad(relativeHeading);
 for i = 1:numel(follower.time)
     if i > numel(unifiedStruct.timeVec)
         break
     end
     if testPose(i) < distanceThresh
-        rightLaneHeadingAngle_followerEst(i) = -relativeHeading(i) + sent.laneStats.rightLane.sentHeadingAngle(i);
-        leftLaneHeadingAngle_followerEst(i) = -relativeHeading(i) + sent.laneStats.leftLane.sentHeadingAngle(i);
+        rightLaneHeadingAngle_followerEst(i) = relativeHeading(i) + sent.laneStats.rightLane.sentHeadingAngle(i);
+        leftLaneHeadingAngle_followerEst(i) = relativeHeading(i) + sent.laneStats.leftLane.sentHeadingAngle(i);
     else
         rightLaneHeadingAngle_followerEst(i) = unifiedStruct.laneStats.rightLane.headingAngle.followerValues(i);
         leftLaneHeadingAngle_followerEst(i)  = unifiedStruct.laneStats.leftLane.headingAngle.followerValues(i);
     end
 end
-
+relativeHeading = deg2rad(relativeHeading);
 %% Plot lane estimations
 figure
 xlim([-4,4])
