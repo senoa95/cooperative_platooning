@@ -405,7 +405,7 @@ grid on
 plot(allTime, leftLaneRaw_unocludedFollowArea,'r','LineWidth',2)
 legend('Augmented Area Diff', 'RawArea Diff')
 xlabel('Time')
-ylabel('Normalized Area Between Approximations (m)')
+ylabel('Normalized Area Between Approximations (m^2)')
 title('Normalized Area Between Lead and Follow Approximations - Left Lane')
 
 figure
@@ -415,7 +415,7 @@ grid on
 plot(allTime, rightLaneRaw_unocludedFollowArea,'r','LineWidth',2)
 legend('Augmented Area Diff', 'RawArea Diff')
 xlabel('Time')
-ylabel('Normalized Area Between Approximations (m)')
+ylabel('Normalized Area Between Approximations (m^2)')
 title('Normalized Area Between Lead and Follow Approximations - Right Lane')
 
 
@@ -427,7 +427,7 @@ grid on
 plot(allTime, leftLaneRaw_leadFollowArea,'c','LineWidth',2)
 legend('Augmented Area Diff with Unocluded Follower', 'Raw Area Diff  with Unocluded Follower')
 xlabel('Time')
-ylabel('Normalized Area Between Approximations (m)')
+ylabel('Normalized Area Between Approximations (m^2)')
 title('Normalized Area Between  Unocluded Follower and Ocluded Follow Approximations - Left Lane')
 
 figure
@@ -437,19 +437,19 @@ grid on
 plot(allTime, rightLaneRaw_leadFollowArea,'c','LineWidth',2)
 legend('Augmented Area Diff with Unocluded Follower', 'Raw Area Diff  with Unocluded Follower')
 xlabel('Time')
-ylabel('Normalized Area Between Approximations (m)')
+ylabel('Normalized Area Between Approximations (m^2)')
 title('Normalized Area Between  Unocluded Follower and Ocluded Follow Approximations - Right Lane')
 
 figure
 plot(allTime, leaderFollowerAreaLeftLane,'g','LineWidth',2)
 xlabel('Time')
-ylabel('Normalized Area Between Approximations (m)')
+ylabel('Normalized Area Between Approximations (m^2)')
 legend('Area Diff Between Leader and Unocluded Follower - Left Lane')
 figure
 plot(allTime, leaderFollowerAreaRightLane,'r','LineWidth',2)
 legend('Area Diff Between Leader and Unocluded Follower - Right Lane')
 xlabel('Time')
-ylabel('Normalized Area Between Approximations (m)')
+ylabel('Normalized Area Between Approximations (m^2)')
 
 %% Rotation
 function  rotatedLane = rotateLane(lane,relativeHeading)
