@@ -428,7 +428,7 @@ plot(allTime, leftLaneRaw_leadFollowArea,'c','LineWidth',2)
 legend('Augmented Area Diff with Unocluded Follower', 'Raw Area Diff  with Unocluded Follower')
 xlabel('Time')
 ylabel('Normalized Area Between Approximations (m^2)')
-title('Normalized Area Between  Unocluded Follower and Ocluded Follow Approximations - Left Lane')
+title('Normalized Area Between  Unocluded Follower and Ocluded Follower Approximations - Left Lane')
 
 figure
 plot(allTime, rightLaneAugmented_unocludedFollowArea,'m','LineWidth',2)
@@ -438,7 +438,7 @@ plot(allTime, rightLaneRaw_leadFollowArea,'c','LineWidth',2)
 legend('Augmented Area Diff with Unocluded Follower', 'Raw Area Diff  with Unocluded Follower')
 xlabel('Time')
 ylabel('Normalized Area Between Approximations (m^2)')
-title('Normalized Area Between  Unocluded Follower and Ocluded Follow Approximations - Right Lane')
+title('Normalized Area Between  Unocluded Follower and Ocluded Follower Approximations - Right Lane')
 
 figure
 plot(allTime, leaderFollowerAreaLeftLane,'g','LineWidth',2)
