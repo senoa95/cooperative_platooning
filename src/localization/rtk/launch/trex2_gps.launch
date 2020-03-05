@@ -26,4 +26,6 @@
     <remap from="inspva" to="trex2/inspva" />
     <remap from="insstdev" to="trex2/insstdev" />
   </node>
+  
+  <node name="trex2_rtk" pkg="rtk" type="rtcm_sub.py" />
 </launch>
