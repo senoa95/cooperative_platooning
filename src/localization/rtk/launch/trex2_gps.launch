@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<launch>
+  <node name="trex2_gps"
+        pkg="nodelet" type="nodelet"
+        args="standalone novatel_gps_driver/novatel_gps_nodelet" >
+    <rosparam>
+      verbose: true
+      connection_type: serial
+      device: /dev/ttyUSB2
+      publish_novatel_positions: true
+      frame_id: world_frame
+      use_binary_messages: true
+      imu_rate: 20
+      imu_frame_id: base_link
+      publish_imu_messages: true
+      publish_novatel_velocity: true
+    </rosparam>
+    <remap from="bestpos" to="trex2/bestpos" />
+    <remap from="bestvel" to="trex2/bestvel" />
+    <remap from="corrimudata" to="trex2/corrimudata" />
+    <remap from="diagnostics" to="trex2/diagnostics" />
+    <remap from="fix" to="trex2/fix" />
+    <remap from="gps" to="trex2/gps" />
+    <remap from="imu" to="trex2/imu" />
+    <remap from="inscov" to="trex2/inscov" />
+    <remap from="inspva" to="trex2/inspva" />
+    <remap from="insstdev" to="trex2/insstdev" />
+  </node>
+</launch>
