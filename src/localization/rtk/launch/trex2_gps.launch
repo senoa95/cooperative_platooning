@@ -15,5 +15,15 @@
       publish_imu_messages: true
       publish_novatel_velocity: true
     </rosparam>
+    <remap from="bestpos" to="trex2/bestpos" />
+    <remap from="bestvel" to="trex/bestvel" />
+    <remap from="corrimudata" to=" trex2/corrimudata" />
+    <remap from="diagnostics" to=" trex2/diagnostics" />
+    <remap from="fix" to=" trex2/fix" />
+    <remap from="gps" to=" trex2/gps" />
+    <remap from="imu" to=" trex2/imu" />
+    <remap from="inscov" to=" trex2/inscov" />
+    <remap from="inspva" to=" trex2/inspva" />
+    <remap from="insstdev" to=" trex2/insstdev" />
   </node>
 </launch>
