@@ -2,8 +2,9 @@
 %%
 close all
 clearvars  -except loaded_leader_allData loaded_follower_allData
+useLeaderDist = true;
 distanceThresh = 0.8;
-ws_DIR = '/home/senoa95/coop_paltoon/src/automated_driving_toolbox_sim_tools/Working Matlab Synthetic Driving Scenarios/Data';
+ws_DIR = '/home/senoa95/cooperative_platooning/src/automated_driving_toolbox_sim_tools/Working Matlab Synthetic Driving Scenarios/Data';
 %Scene: S-Shape = 's'
 %Scene: Right Turn = 'right_turn'
 %Scene: Straight = 'straight'
@@ -21,7 +22,7 @@ rightLaneAugmented_leadFollowArea = [];
 leftLaneRaw_leadFollowArea = [];
 rightLaneRaw_leadFollowArea = [];
 
-sceneName = 'long_s';
+sceneName = 'right_turn';
 [follower_allData, leader_allData, follower_alone_allData] = scene_selector(sceneName,ws_DIR);
 [followerTimeHeadwayVector, followerDistanceHeadwayVector] = leader_follower_timing(follower_allData,leader_allData);
 [followerTimeHeadwayVector_alone, ~] = leader_follower_timing(follower_alone_allData,leader_allData);
@@ -138,11 +139,11 @@ for mIdx = 1:2
             leaderVar_leftLaneDist = nan;
         end
         
-        if followerVar_leftLaneDist > followerVar_rightLaneDist && testPose(i) < distanceThresh
+        if followerVar_leftLaneDist > followerVar_rightLaneDist && testPose(i) < distanceThresh && useLeaderDist
             usableDist_rightLaneDist(i) = follower.laneStats.rightLane.distance(i);
             usableDist_leftLaneDist(i) = sent.laneStats.laneWidth(i) + usableDist_rightLaneDist(i);
             corrected = corrected + 1;
-        elseif followerVar_rightLaneDist < followerVar_leftLaneDist && testPose(i) < distanceThresh
+        elseif followerVar_rightLaneDist < followerVar_leftLaneDist && testPose(i) < distanceThresh && useLeaderDist
             usableDist_leftLaneDist(i) = follower.laneStats.leftLane.distance(i);
             usableDist_rightLaneDist(i) = -(sent.laneStats.laneWidth(i) - usableDist_leftLaneDist(i));
             corrected = corrected + 1;
@@ -405,7 +406,7 @@ grid on
 plot(allTime, leftLaneRaw_unocludedFollowArea,'r','LineWidth',2)
 legend('Augmented Area Diff', 'RawArea Diff')
 xlabel('Time')
-ylabel('Normalized Area Between Approximations (m^2)')
+ylabel('Normalized Area Between Approximations (m)')
 title('Normalized Area Between Lead and Follow Approximations - Left Lane')
 
 figure
@@ -415,7 +416,7 @@ grid on
 plot(allTime, rightLaneRaw_unocludedFollowArea,'r','LineWidth',2)
 legend('Augmented Area Diff', 'RawArea Diff')
 xlabel('Time')
-ylabel('Normalized Area Between Approximations (m^2)')
+ylabel('Normalized Area Between Approximations (m)')
 title('Normalized Area Between Lead and Follow Approximations - Right Lane')
 
 
@@ -426,9 +427,9 @@ hold on
 grid on
 plot(allTime, leftLaneRaw_leadFollowArea,'c','LineWidth',2)
 legend('Augmented Area Diff with Unocluded Follower', 'Raw Area Diff  with Unocluded Follower')
-xlabel('Time')
-ylabel('Normalized Area Between Approximations (m^2)')
-title('Normalized Area Between  Unocluded Follower and Ocluded Follower Approximations - Left Lane')
+xlabel('Time (s)')
+ylabel('Normalized Area Between Approximations (m)')
+title('Normalized Area Between  Unocluded Follower and Ocluded Follow Approximations - Left Lane')
 
 figure
 plot(allTime, rightLaneAugmented_unocludedFollowArea,'m','LineWidth',2)
@@ -436,20 +437,20 @@ hold on
 grid on
 plot(allTime, rightLaneRaw_leadFollowArea,'c','LineWidth',2)
 legend('Augmented Area Diff with Unocluded Follower', 'Raw Area Diff  with Unocluded Follower')
-xlabel('Time')
-ylabel('Normalized Area Between Approximations (m^2)')
-title('Normalized Area Between  Unocluded Follower and Ocluded Follower Approximations - Right Lane')
+xlabel('Time (s)')
+ylabel('Normalized Area Between Approximations (m)')
+title('Normalized Area Between  Unocluded Follower and Ocluded Follow Approximations - Right Lane')
 
 figure
 plot(allTime, leaderFollowerAreaLeftLane,'g','LineWidth',2)
-xlabel('Time')
-ylabel('Normalized Area Between Approximations (m^2)')
+xlabel('Time (s)')
+ylabel('Normalized Area Between Approximations (m)')
 legend('Area Diff Between Leader and Unocluded Follower - Left Lane')
 figure
 plot(allTime, leaderFollowerAreaRightLane,'r','LineWidth',2)
 legend('Area Diff Between Leader and Unocluded Follower - Right Lane')
-xlabel('Time')
-ylabel('Normalized Area Between Approximations (m^2)')
+xlabel('Time (s)')
+ylabel('Normalized Area Between Approximations (m)')
 
 %% Rotation
 function  rotatedLane = rotateLane(lane,relativeHeading)
