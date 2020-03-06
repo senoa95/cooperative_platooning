@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<launch>
+    <include file="$(find turtle_description)/launch/description.launch">
+        <arg name="is_sim" value="0"/>
+    </include>
+
+    <rosparam command="load" file="$(find turtle_control)/config/control.yaml" />
+
+    <node name="trex2_base_controller_spawner" pkg="controller_manager" type="spawner" args="turtle_joint_publisher turtle_velocity_controller">
+    <rosparam>
+        odom_type: "imu"
+    </rosparam>
+    </node>
+
+    <node name="trex2_control" pkg="turtle_control" type="turtle_base">
+    <remap from="turtle_velocity_controller/cmd_vel" to="trex2/cmd_vel" />
+    <remap from="turtle_velocity_controller/odom" to="trex2/odom" />
+    <remap from="turtle_velocity_controller/parameter_descriptions" to="trex2/parameter_descriptions" />
+    <remap from="turtle_velocity_controller/parameter_updates" to="trex2/parameter_updates" />
+    <remap from="left/cmd" to="trex2/left/cmd" />
+    <remap from="left/feedback" to="trex2/left/feedback" />
+    <remap from="right/cmd" to="trex2/right/cmd" />
+    <remap from="right/feedback" to="trex2/right/feedback" />
+    <remap from="compiled_imu" to="trex2/compiled_imu" />
+    <remap from="corrimudata" to="trex2/corrimudata" />
+    <remap from="inspva" to="trex2/inspva" />
+    <remap from="insstdev" to="trex2/insstdev" />
+    <remap from="joint_states" to="trex2/joint_states" />
+    <remap from="tf" to="trex2/tf" />
+    </node>
+    
+    <node pkg="trex2_roboteq_driver" type="driver_node" name="roboteq_driver" output="screen">
+    <rosparam>
+    port: /dev/ttyACM0
+    baud: 115200
+    channels: [left, right]
+    </rosparam>
+    <remap from="left/cmd" to="trex2/left/cmd" />
+    <remap from="left/feedback" to="trex2/left/feedback" />
+    <remap from="right/cmd" to="trex2/right/cmd" />
+    <remap from="right/feedback" to="trex2/right/feedback" />
+    <remap from="roboteq_driver/status" to="trex2/roboteq_driver/status" />
+    </node>
+</launch>
