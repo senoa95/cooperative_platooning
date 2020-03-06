@@ -29,7 +29,7 @@
     <remap from="tf" to="trex2/tf" />
     </node>
     
-    <node pkg="trex2_roboteq_driver" type="driver_node" name="roboteq_driver" output="screen">
+    <node name="trex2_roboteq_driver" pkg="roboteq_driver" type="driver_node" output="screen">
     <rosparam>
     port: /dev/ttyACM0
     baud: 115200
