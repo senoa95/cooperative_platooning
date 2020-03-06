@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<launch>
+
+<node respawn="true" pkg="joy"
+  type="joy_node" name="trex2_joy_control" output="screen">
+  <param name="dev" type="string" value="/dev/input/js0"/>
+  <param name="deadzone" value="0.3"/>
+  <param name="autorepeat_rate" value="20" />
+  <remap from="diagnostics" to="trex2/diagnostics" />
+  <remap from="joy" to="trex2/joy" />
+  <remap from="joy/set_feedback" to="trex2/joy/set_feedback" />
+  <remap from="left/cmd" to="trex2/left/cmd" />
+  <remap from="left/feedback" to="trex2/left/feedback" />
+  <remap from="right/cmd" to="trex2/right/cmd" />
+  <remap from="right/feedback" to="trex2/right/feedback" />
+</node>
+
+<node pkg="turtle_control" type="teleop_turtle" name="teleop">
+<remap from="joy" to="trex2/joy" />
+<remap from="joy/set_feedback" to="trex2/joy/set_feedback" />
+<remap from="left/cmd" to="trex2/left/cmd" />
+<remap from="left/feedback" to="trex2/left/feedback" />
+<remap from="right/cmd" to="trex2/right/cmd" />
+<remap from="right/feedback" to="trex2/right/feedback" />
+<remap from="turtle_velocity_controller/cmd_vel" to="trex2/cmd_vel" />
+</node>
+
+<param name="axis_linear" value="1" type="int"/>
+<param name="axis_angular" value="2" type="int"/>
+<param name="scale_linear" value="2" type="double"/>
+<param name="scale_angular" value="2" type="double"/>
+
+</launch>
