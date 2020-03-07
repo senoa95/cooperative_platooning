@@ -15,14 +15,14 @@
   <remap from="right/feedback" to="trex/right/feedback" />
 </node>
 
-<node pkg="turtle_control" type="teleop_turtle" name="trex_teleop">
-  <remap from="joy" to="trex/joy" />
-  <remap from="joy/set_feedback" to="trex/joy/set_feedback" />
-  <remap from="left/cmd" to="trex/left/cmd" />
-  <remap from="left/feedback" to="trex/left/feedback" />
-  <remap from="right/cmd" to="trex/right/cmd" />
-  <remap from="right/feedback" to="trex/right/feedback" />
-  <remap from="turtle_velocity_controller/cmd_vel" to="trex/cmd_vel" />
+<node pkg="turtle_control" type="teleop_turtle" name="teleop">
+<remap from="joy" to="trex/joy" />
+<remap from="joy/set_feedback" to="trex/joy/set_feedback" />
+<remap from="left/cmd" to="trex/left/cmd" />
+<remap from="left/feedback" to="trex/left/feedback" />
+<remap from="right/cmd" to="trex/right/cmd" />
+<remap from="right/feedback" to="trex/right/feedback" />
+<remap from="turtle_velocity_controller/cmd_vel" to="trex/cmd_vel" />
 </node>
 
 <param name="axis_linear" value="1" type="int"/>

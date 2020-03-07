@@ -13,20 +13,20 @@
     </node>
 
     <node name="trex_control" pkg="turtle_control" type="turtle_base">
-    <remap from="turtle_velocity_controller/cmd_vel" to="trex/cmd_vel" />
-    <remap from="turtle_velocity_controller/odom" to="trex/odom" />
-    <remap from="turtle_velocity_controller/parameter_descriptions" to="trex/parameter_descriptions" />
-    <remap from="turtle_velocity_controller/parameter_updates" to="trex/parameter_updates" />
-    <remap from="left/cmd" to="trex/left/cmd" />
-    <remap from="left/feedback" to="trex/left/feedback" />
-    <remap from="right/cmd" to="trex/right/cmd" />
-    <remap from="right/feedback" to="trex/right/feedback" />
-    <remap from="compiled_imu" to="trex/compiled_imu" />
-    <remap from="corrimudata" to="trex/corrimudata" />
-    <remap from="inspva" to="trex/inspva" />
-    <remap from="insstdev" to="trex/insstdev" />
-    <remap from="joint_states" to="trex/joint_states" />
-    <remap from="tf" to="trex/tf" />
+        <remap from="turtle_velocity_controller/cmd_vel" to="trex/cmd_vel" />
+        <remap from="turtle_velocity_controller/odom" to="trex/odom" />
+        <remap from="turtle_velocity_controller/parameter_descriptions" to="trex/parameter_descriptions" />
+        <remap from="turtle_velocity_controller/parameter_updates" to="trex/parameter_updates" />
+        <remap from="left/cmd" to="trex/left/cmd" />
+        <remap from="left/feedback" to="trex/left/feedback" />
+        <remap from="right/cmd" to="trex/right/cmd" />
+        <remap from="right/feedback" to="trex/right/feedback" />
+        <remap from="compiled_imu" to="trex/compiled_imu" />
+        <remap from="corrimudata" to="trex/corrimudata" />
+        <remap from="inspva" to="trex/inspva" />
+        <remap from="insstdev" to="trex/insstdev" />
+        <remap from="joint_states" to="trex/joint_states" />
+        <remap from="tf" to="trex/tf" />
     </node>
     
     <node name="trex_roboteq_driver" pkg="roboteq_driver" type="driver_node" output="screen">

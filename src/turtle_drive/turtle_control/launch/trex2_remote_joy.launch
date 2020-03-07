@@ -15,7 +15,7 @@
   <remap from="right/feedback" to="trex2/right/feedback" />
 </node>
 
-<node pkg="turtle_control" type="teleop_turtle" name="teleop">
+<node pkg="turtle_control" type="teleop_turtle" name="trex2_teleop">
 <remap from="joy" to="trex2/joy" />
 <remap from="joy/set_feedback" to="trex2/joy/set_feedback" />
 <remap from="left/cmd" to="trex2/left/cmd" />
