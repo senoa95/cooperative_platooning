@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<launch>
+  <node name="trex_rtk" pkg="rtk" type="rtcm_sub.py" />
+</launch>
