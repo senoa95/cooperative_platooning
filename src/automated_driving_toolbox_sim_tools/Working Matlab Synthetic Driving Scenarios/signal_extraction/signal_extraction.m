@@ -22,7 +22,7 @@ rightLaneAugmented_leadFollowArea = [];
 leftLaneRaw_leadFollowArea = [];
 rightLaneRaw_leadFollowArea = [];
 
-sceneName = 'right_turn';
+sceneName = 'straight_weaving';
 [follower_allData, leader_allData, follower_alone_allData] = scene_selector(sceneName,ws_DIR);
 [followerTimeHeadwayVector, followerDistanceHeadwayVector] = leader_follower_timing(follower_allData,leader_allData);
 [followerTimeHeadwayVector_alone, ~] = leader_follower_timing(follower_alone_allData,leader_allData);
@@ -406,8 +406,8 @@ grid on
 plot(allTime, leftLaneRaw_unocludedFollowArea,'r','LineWidth',2)
 legend('Augmented Area Diff', 'RawArea Diff')
 xlabel('Time')
-ylabel('Normalized Area Between Approximations (m)')
-title('Normalized Area Between Lead and Follow Approximations - Left Lane')
+ylabel('Normalized Area Between Approximations (m)', 'FontSize',20)
+title('Normalized Area Between Lead and Follow Approximations - Left Lane', 'FontSize',20)
 
 figure
 plot(allTime, rightLaneAugmented_leadFollowArea,'g','LineWidth',2)
@@ -416,8 +416,8 @@ grid on
 plot(allTime, rightLaneRaw_unocludedFollowArea,'r','LineWidth',2)
 legend('Augmented Area Diff', 'RawArea Diff')
 xlabel('Time')
-ylabel('Normalized Area Between Approximations (m)')
-title('Normalized Area Between Lead and Follow Approximations - Right Lane')
+ylabel('Normalized Area Between Approximations (m)', 'FontSize',20)
+title('Normalized Area Between Lead and Follow Approximations - Right Lane', 'FontSize',20)
 
 
 %Plot Analytics
@@ -427,9 +427,9 @@ hold on
 grid on
 plot(allTime, leftLaneRaw_leadFollowArea,'c','LineWidth',2)
 legend('Augmented Area Diff with Unocluded Follower', 'Raw Area Diff  with Unocluded Follower')
-xlabel('Time (s)')
-ylabel('Normalized Area Between Approximations (m)')
-title('Normalized Area Between  Unocluded Follower and Ocluded Follow Approximations - Left Lane')
+xlabel('Time (s)', 'FontSize',20)
+ylabel('Normalized Area Between Approximations (m)', 'FontSize',20)
+title('Normalized Area Between  Unocluded Follower and Ocluded Follow Approximations - Left Lane', 'FontSize',20)
 
 figure
 plot(allTime, rightLaneAugmented_unocludedFollowArea,'m','LineWidth',2)
@@ -437,20 +437,20 @@ hold on
 grid on
 plot(allTime, rightLaneRaw_leadFollowArea,'c','LineWidth',2)
 legend('Augmented Area Diff with Unocluded Follower', 'Raw Area Diff  with Unocluded Follower')
-xlabel('Time (s)')
-ylabel('Normalized Area Between Approximations (m)')
-title('Normalized Area Between  Unocluded Follower and Ocluded Follow Approximations - Right Lane')
+xlabel('Time (s)', 'FontSize',20)
+ylabel('Normalized Area Between Approximations (m)', 'FontSize',20)
+title('Normalized Area Between  Unocluded Follower and Ocluded Follow Approximations - Right Lane', 'FontSize',20)
 
 figure
 plot(allTime, leaderFollowerAreaLeftLane,'g','LineWidth',2)
-xlabel('Time (s)')
-ylabel('Normalized Area Between Approximations (m)')
+xlabel('Time (s)', 'FontSize',20)
+ylabel('Normalized Area Between Approximations (m)', 'FontSize',20)
 legend('Area Diff Between Leader and Unocluded Follower - Left Lane')
 figure
 plot(allTime, leaderFollowerAreaRightLane,'r','LineWidth',2)
 legend('Area Diff Between Leader and Unocluded Follower - Right Lane')
-xlabel('Time (s)')
-ylabel('Normalized Area Between Approximations (m)')
+xlabel('Time (s)', 'FontSize',20)
+ylabel('Normalized Area Between Approximations (m)', 'FontSize',20)
 
 %% Rotation
 function  rotatedLane = rotateLane(lane,relativeHeading)
@@ -735,6 +735,7 @@ title('Heading Angle To Right Lane')
 %
 % subplot(2,1,2)
 % hold on;
+          RX packets:3748 errors:0 dropped:1 overruns:0 frame:0
 % plot(leader.time,leader.curvature,'--')
 % plot(leader.headwayedTime,leader.curvature)
 % plot(follower.time, follower.curvature)
