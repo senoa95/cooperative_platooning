@@ -29,15 +29,15 @@ end
 
 while true
 %% subscribe to compressed camera image
-cam_topic = '/usb_cam/image_raw/compressed';
+cam_topic = '/trex_cam/image_raw/compressed';
 sub = rossubscriber(cam_topic);
 msg = sub.receive;
 frame = msg.readImage;
 
 %% specify lane detection parameters
-distAheadOfSensor = 55; % in meters, as previously specified in monoCamera height input
-spaceToOneSide    = 10;  % all other distance quantities are also in meters
-bottomOffset      = 2;
+distAheadOfSensor = 15; % in meters, as previously specified in monoCamera height input
+spaceToOneSide    = 4;  % all other distance quantities are also in meters
+bottomOffset      = 0.1;
 
 outView   = [bottomOffset, distAheadOfSensor, -spaceToOneSide, spaceToOneSide]; % [xmin, xmax, ymin, ymax]
 imageSize = [NaN, 640]; % output image width in pixels; height is chosen automatically to preserve units per pixel ratio
@@ -51,8 +51,8 @@ birdsEyeImage = transformImage(birdsEyeConfig, frame);
 birdsEyeImage = rgb2gray(birdsEyeImage);
 
 % Lane marker segmentation ROI in world units
-vehicleROI = outView - [0, 0, -0.85, 0.85]; % look 3 meters to left and right, and 4 meters ahead of the sensor
-approxLaneMarkerWidthVehicle = 0.15; % centimeters
+vehicleROI = outView - [0, 0, -0.1, 0.1]; % look 3 meters to left and right, and 4 meters ahead of the sensor
+approxLaneMarkerWidthVehicle = 0.2; % centimeters
 
 %% detect lane 
 % Detect lane features
@@ -72,7 +72,7 @@ boundaryWidth = 3*approxLaneMarkerWidthVehicle; % expand boundary width
 %% filter lanes
 % Establish criteria for rejecting boundaries based on their length
 maxPossibleXLength = diff(vehicleROI(1:2));
-minXLength         = maxPossibleXLength * 0.60; % establish a threshold
+minXLength         = maxPossibleXLength * 0.1; % establish a threshold
 
 % Reject short boundaries
 isOfMinLength = arrayfun(@(b)diff(b.XExtent) > minXLength, boundaries);
@@ -192,13 +192,13 @@ end
 
 % if ~isempty(leftEgoBoundary) || ~isempty(rightEgoBoundary)
 
-    sim('estimate_lane_center.slx')
-    centerEgoBoundary.Parameters(1) = mean(center_curvature_derivative.Data);
-    centerEgoBoundary.Parameters(2) = mean(center_curvature.Data(1,:));
-    centerEgoBoundary.Parameters(3) = mean(center_relative_yaw_angle.Data);
-    centerEgoBoundary.Parameters(4) = mean(center_lateral_deviation.Data);
-    disp('CENTER lane params')
-    disp(centerEgoBoundary.Parameters)
+% %     sim('estimate_lane_center.slx')
+%     centerEgoBoundary.Parameters(1) = mean(center_curvature_derivative.Data);
+%     centerEgoBoundary.Parameters(2) = mean(center_curvature.Data(1,:));
+%     centerEgoBoundary.Parameters(3) = mean(center_relative_yaw_angle.Data);
+%     centerEgoBoundary.Parameters(4) = mean(center_lateral_deviation.Data);
+%     disp('CENTER lane params')
+%     disp(centerEgoBoundary.Parameters)
     
     [birdsEyeWithEgoLane,frameWithEgoLane] = showLanes(birdsEyeImage,leftEgoBoundary,centerEgoBoundary,rightEgoBoundary,birdsEyeConfig,bottomOffset,distAheadOfSensor,frame,sensor);
 %     clear centerEgoBoundary
