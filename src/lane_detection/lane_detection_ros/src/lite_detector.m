@@ -2,6 +2,7 @@ close all
 clear
 clc
 
+veh_id = 'trex';
 %% initialize camara intrinsics
 % focalLength = cameraParams.FocalLength;
 % principalPoint = cameraParams.PrincipalPoint;
@@ -16,6 +17,54 @@ height = 0.3;    % mounting height in meters from the ground
 pitch  = 0;        % pitch of the camera in degrees
 sensor = monoCamera(camIntrinsics, height, 'Pitch', pitch);
 %% initialize matlab ros node
+rosshutdown
+rosinit
+
+
+cam_topic = ['/', veh_id, '_cam/image_raw/compressed'];
+cam_sub = rossubscriber(cam_topic);
+
+% % right_lane_rho_dot_topic = ['/', veh_id, '/right_lane/rhoDot'];
+% % right_lane_rho_dot_pub = rospublisher(right_lane_rho_dot_topic,'std_msgs/Float32');
+% % right_lane_rho_dot_msg = rosmessage(right_lane_rho_dot_pub);
+% % 
+% % right_lane_rho_topic = ['/', veh_id, '/right_lane/rho'];
+% % right_lane_rho_pub = rospublisher(right_lane_rho_topic,'std_msgs/Float32');
+% % right_lane_rho_msg = rosmessage(right_lane_rho_pub);
+% % 
+% % right_lane_phi_topic = ['/', veh_id, '/right_lane/phi'];
+% % right_lane_phi_pub = rospublisher(right_lane_phi_topic,'std_msgs/Float32');
+% % right_lane_phi_msg = rosmessage(right_lane_phi_pub);
+% % 
+% % right_lane_y_topic = ['/', veh_id, '/right_lane/y'];
+% % right_lane_y_pub = rospublisher(right_lane_y_topic,'std_msgs/Float32');
+% % right_lane_y_msg = rosmessage(right_lane_y_pub);
+% % 
+% % left_lane_rho_dot_topic = ['/', veh_id, '/right_lane/rhoDot'];
+% % left_lane_rho_dot_pub = rospublisher(left_lane_rho_dot_topic,'std_msgs/Float32');
+% % left_lane_rho_dot_msg = rosmessage(left_lane_rho_dot_pub);
+% % 
+% % left_lane_rho_topic = ['/', veh_id, '/right_lane/rho'];
+% % left_lane_rho_pub = rospublisher(left_lane_rho_topic,'std_msgs/Float32');
+% % left_lane_rho_msg = rosmessage(left_lane_rho_pub);
+% % 
+% % left_lane_phi_topic = ['/', veh_id, '/right_lane/phi'];
+% % left_lane_phi_pub = rospublisher(left_lane_phi_topic,'std_msgs/Float32');
+% % left_lane_phi_msg = rosmessage(left_lane_phi_pub);
+% % 
+% % left_lane_y_topic = ['/',veh_id, '/left_lane/y'];
+% % left_lane_y_pub = rospublisher(left_lane_y_topic,'path_follower/lane');
+% % left_lane_y_msg = rosmessage(left_lane_y_pub);
+
+left_lane_topic = ['/',veh_id, '/left_lane'];
+left_lane_pub = rospublisher(left_lane_topic,'path_follower/lane');
+left_lane_msg = rosmessage(left_lane_pub);
+
+right_lane_topic = ['/',veh_id, '/right_lane'];
+right_lane_pub = rospublisher(right_lane_topic,'path_follower/lane');
+right_lane_msg = rosmessage(right_lane_pub);
+
+%% Initialize Lane Center Detector Values
 Ts = 0.1;
 PredictionHorizon = 2;
 % center_curvature_derivative.Data = 0;
@@ -23,15 +72,12 @@ PredictionHorizon = 2;
 % center_relative_yaw_angle.Data = 0; 
 % center_lateral_deviation.Data = 0;
 
-if ros.internal.Global.isNodeActive == 0
-    rosinit
-end
+%% Main Loop
 
 while true
 %% subscribe to compressed camera image
-cam_topic = '/trex_cam/image_raw/compressed';
-sub = rossubscriber(cam_topic);
-msg = sub.receive;
+
+msg = cam_sub.receive;
 frame = msg.readImage;
 
 %% specify lane detection parameters
@@ -140,11 +186,11 @@ if isempty(leftEgoBoundary)
         
 %         pack left lane values with zeros. Set strength to 0.
         disp('left lane not detected')
-        left_strength = -100;
-        left_curvature_rate = 100;
-        left_curvature = 100;
-        left_relative_yaw_angle = 100;
-        left_lateral_deviation = 100;
+        left_strength = 0;
+        left_curvature_rate = 0;
+        left_curvature = 0;
+        left_relative_yaw_angle = 0;
+        left_lateral_deviation = 0;
     else
 %         if both left and right lanes not detected continue
         disp('no lanes detected. continuing')
@@ -180,13 +226,47 @@ else
     else
 %         pack right lane values with zeros. Set strength to 0.
         disp('right lane not detected')
-        right_strength = -100;
-        right_curvature_rate = 100;
-        right_curvature = 100;
-        right_relative_yaw_angle = 100;
-        right_lateral_deviation = 100;
+        right_strength = 0;
+        right_curvature_rate = 0;
+        right_curvature = 0;
+        right_relative_yaw_angle = 0;
+        right_lateral_deviation = 0;
     end
 end
+
+right_lane_msg.Strength = right_strength;
+right_lane_msg.RhoDot = right_curvature_rate;
+right_lane_msg.Rho = right_curvature;
+right_lane_msg.Phi = right_relative_yaw_angle;
+right_lane_msg.Y = right_lateral_deviation;
+send(right_lane_pub, right_lane_msg)
+
+
+left_lane_msg.Strength = left_strength;
+left_lane_msg.RhoDot = left_curvature_rate;
+left_lane_msg.Rho = left_curvature;
+left_lane_msg.Phi = left_relative_yaw_angle;
+left_lane_msg.Y = left_lateral_deviation;
+send(left_lane_pub, left_lane_msg)
+
+% 
+% right_lane_rho_dot_msg.Data = right_curvature_rate;
+% send(right_lane_rho_dot_pub, right_lane_rho_dot_msg)
+% right_lane_rho_msg.Data = right_curvature;
+% send(right_lane_rho_pub, right_lane_rho_msg)
+% right_lane_phi_msg.Data = right_relative_yaw_angle;
+% send(right_lane_phi_pub, right_lane_phi_msg)
+% right_lane_y_msg.Data = right_lateral_deviation;
+% send(right_lane_y_pub, right_lane_y_msg)
+% 
+% left_lane_rho_dot_msg.Data = left_curvature_rate;
+% send(left_lane_rho_dot_pub, left_lane_rho_dot_msg)
+% left_lane_rho_msg.Data = left_curvature;
+% send(left_lane_rho_pub, left_lane_rho_msg)
+% left_lane_phi_msg.Data = left_relative_yaw_angle;
+% send(left_lane_phi_pub, left_lane_phi_msg)
+% left_lane_y_msg.Phi = left_lateral_deviation;
+% send(left_lane_y_pub, left_lane_y_msg.Phi)
 
 %     [birdsEyeWithEgoLane,frameWithEgoLane] = showLanes(birdsEyeImage,leftEgoBoundary,leftEgoBoundary,rightEgoBoundary,birdsEyeConfig,bottomOffset,distAheadOfSensor,frame,sensor);
 
@@ -216,13 +296,13 @@ end
 function [birdsEyeWithEgoLane,frameWithEgoLane] =showLanes(birdsEyeImage,leftEgoBoundary,centerEgoBoundary,rightEgoBoundary,birdsEyeConfig,bottomOffset,distAheadOfSensor,frame,sensor)
 
 xVehiclePoints = bottomOffset:distAheadOfSensor;
-birdsEyeWithEgoLane = insertLaneBoundary(birdsEyeImage, leftEgoBoundary , birdsEyeConfig, xVehiclePoints, 'Color','Red');
-birdsEyeWithEgoLane = insertLaneBoundary(birdsEyeWithEgoLane, centerEgoBoundary, birdsEyeConfig, xVehiclePoints, 'Color','Blue');
-birdsEyeWithEgoLane = insertLaneBoundary(birdsEyeWithEgoLane, rightEgoBoundary, birdsEyeConfig, xVehiclePoints, 'Color','Green');
+birdsEyeWithEgoLane = insertLaneBoundary(birdsEyeImage, leftEgoBoundary , birdsEyeConfig, xVehiclePoints, 'Color','Red', 'LineWidth', 7);
+birdsEyeWithEgoLane = insertLaneBoundary(birdsEyeWithEgoLane, centerEgoBoundary, birdsEyeConfig, xVehiclePoints, 'Color','Blue', 'LineWidth', 7);
+birdsEyeWithEgoLane = insertLaneBoundary(birdsEyeWithEgoLane, rightEgoBoundary, birdsEyeConfig, xVehiclePoints, 'Color','Green',  'LineWidth', 10);
 
-frameWithEgoLane = insertLaneBoundary(frame, leftEgoBoundary, sensor, xVehiclePoints, 'Color','Red');
-frameWithEgoLane = insertLaneBoundary(frameWithEgoLane, rightEgoBoundary, sensor, xVehiclePoints, 'Color','Green');
-frameWithEgoLane = insertLaneBoundary(frameWithEgoLane, centerEgoBoundary, sensor, xVehiclePoints, 'Color','Blue');
+frameWithEgoLane = insertLaneBoundary(frame, leftEgoBoundary, sensor, xVehiclePoints, 'Color','Red',  'LineWidth', 10);
+frameWithEgoLane = insertLaneBoundary(frameWithEgoLane, rightEgoBoundary, sensor, xVehiclePoints, 'Color','Green',  'LineWidth', 10);
+frameWithEgoLane = insertLaneBoundary(frameWithEgoLane, centerEgoBoundary, sensor, xVehiclePoints, 'Color','Blue',  'LineWidth', 10);
 end
 
 function imageROI = vehicleToImageROI(birdsEyeConfig, vehicleROI)

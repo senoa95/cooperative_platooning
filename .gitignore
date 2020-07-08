@@ -1,3 +1,7 @@
 build/*
 devel/*
 .vscode
+*.pyc
+*.slxc
+*.m~
+*/slprj

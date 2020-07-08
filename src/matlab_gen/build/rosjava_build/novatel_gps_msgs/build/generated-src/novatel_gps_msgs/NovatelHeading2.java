@@ -1,0 +1,46 @@
+package novatel_gps_msgs;
+
+public interface NovatelHeading2 extends org.ros.internal.message.Message {
+  static final java.lang.String _TYPE = "novatel_gps_msgs/NovatelHeading2";
+  static final java.lang.String _DEFINITION = "# Parsed Heading East of North from Novatel receiver. Only ALIGN capable recievers can publish this\nHeader header\n\nNovatelMessageHeader novatel_msg_header\n\n# Solution Status\nstring solution_status\nstring position_type\n\n# Baseline length (m)\nfloat32 baseline_length\n\n# Heading in degrees [0,360)\nfloat32 heading\n\n# Pitch in degrees +- 90\nfloat32 pitch\n\n# Orientation Standard Deviations (deg)\nfloat32 heading_sigma\nfloat32 pitch_sigma\n\n# Station ids\nstring rover_station_id\nstring master_station_id\n\n# Satellite Usage\nuint8 num_satellites_tracked\nuint8 num_satellites_used_in_solution\nuint8 num_satellites_above_elevation_mask_angle\nuint8 num_satellites_above_elevation_mask_angle_l2\n\n# Enum for solution source\nuint8 solution_source\n\nuint8 SOURCE_PRIMARY_ANTENNA=0\nuint8 SOURCE_SECONDARY_ANTENNA=1\n\n# Extended Solution Status\nNovatelExtendedSolutionStatus extended_solution_status\n\n# Signal Masks\nNovatelSignalMask signal_mask";
+  static final boolean _IS_SERVICE = false;
+  static final boolean _IS_ACTION = false;
+  static final byte SOURCE_PRIMARY_ANTENNA = 0;
+  static final byte SOURCE_SECONDARY_ANTENNA = 1;
+  std_msgs.Header getHeader();
+  void setHeader(std_msgs.Header value);
+  novatel_gps_msgs.NovatelMessageHeader getNovatelMsgHeader();
+  void setNovatelMsgHeader(novatel_gps_msgs.NovatelMessageHeader value);
+  java.lang.String getSolutionStatus();
+  void setSolutionStatus(java.lang.String value);
+  java.lang.String getPositionType();
+  void setPositionType(java.lang.String value);
+  float getBaselineLength();
+  void setBaselineLength(float value);
+  float getHeading();
+  void setHeading(float value);
+  float getPitch();
+  void setPitch(float value);
+  float getHeadingSigma();
+  void setHeadingSigma(float value);
+  float getPitchSigma();
+  void setPitchSigma(float value);
+  java.lang.String getRoverStationId();
+  void setRoverStationId(java.lang.String value);
+  java.lang.String getMasterStationId();
+  void setMasterStationId(java.lang.String value);
+  byte getNumSatellitesTracked();
+  void setNumSatellitesTracked(byte value);
+  byte getNumSatellitesUsedInSolution();
+  void setNumSatellitesUsedInSolution(byte value);
+  byte getNumSatellitesAboveElevationMaskAngle();
+  void setNumSatellitesAboveElevationMaskAngle(byte value);
+  byte getNumSatellitesAboveElevationMaskAngleL2();
+  void setNumSatellitesAboveElevationMaskAngleL2(byte value);
+  byte getSolutionSource();
+  void setSolutionSource(byte value);
+  novatel_gps_msgs.NovatelExtendedSolutionStatus getExtendedSolutionStatus();
+  void setExtendedSolutionStatus(novatel_gps_msgs.NovatelExtendedSolutionStatus value);
+  novatel_gps_msgs.NovatelSignalMask getSignalMask();
+  void setSignalMask(novatel_gps_msgs.NovatelSignalMask value);
+}

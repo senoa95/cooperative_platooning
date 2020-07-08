@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script type="text/javascript" src="./js/coder_app.js"></script>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<script type="text/javascript" src="./rtwreport_utils.js"></script>
+<script type="text/javascript" src="./rtwannotate.js"></script>
+<link rel="stylesheet" type="text/css" href="./css/coder_app.css"/>
+</head>
+<body onload="srcFileOnload();">
+<pre id="code">
+<table class="code" id="codeTbl">
+<tr name="1" id="1">
+<td><a id="l1" class='ln'>1</a></td><td><span class="ct">/*</span></td></tr>
+<tr name="2" id="2">
+<td><a id="l2" class='ln'>2</a></td><td><span class="ct"> * estimate_lane_center.c</span></td></tr>
+<tr name="3" id="3">
+<td><a id="l3" class='ln'>3</a></td><td><span class="ct"> *</span></td></tr>
+<tr name="4" id="4">
+<td><a id="l4" class='ln'>4</a></td><td><span class="ct"> * Sponsored License - for use in support of a program or activity</span></td></tr>
+<tr name="5" id="5">
+<td><a id="l5" class='ln'>5</a></td><td><span class="ct"> * sponsored by MathWorks.  Not for government, commercial or other</span></td></tr>
+<tr name="6" id="6">
+<td><a id="l6" class='ln'>6</a></td><td><span class="ct"> * non-sponsored organizational use.</span></td></tr>
+<tr name="7" id="7">
+<td><a id="l7" class='ln'>7</a></td><td><span class="ct"> *</span></td></tr>
+<tr name="8" id="8">
+<td><a id="l8" class='ln'>8</a></td><td><span class="ct"> * Code generation for model "estimate_lane_center".</span></td></tr>
+<tr name="9" id="9">
+<td><a id="l9" class='ln'>9</a></td><td><span class="ct"> *</span></td></tr>
+<tr name="10" id="10">
+<td><a id="l10" class='ln'>10</a></td><td><span class="ct"> * Model version              : 1.778</span></td></tr>
+<tr name="11" id="11">
+<td><a id="l11" class='ln'>11</a></td><td><span class="ct"> * Simulink Coder version : 9.2 (R2019b) 18-Jul-2019</span></td></tr>
+<tr name="12" id="12">
+<td><a id="l12" class='ln'>12</a></td><td><span class="ct"> * C source code generated on : Tue Jul  7 16:54:46 2020</span></td></tr>
+<tr name="13" id="13">
+<td><a id="l13" class='ln'>13</a></td><td><span class="ct"> *</span></td></tr>
+<tr name="14" id="14">
+<td><a id="l14" class='ln'>14</a></td><td><span class="ct"> * Target selection: grt.tlc</span></td></tr>
+<tr name="15" id="15">
+<td><a id="l15" class='ln'>15</a></td><td><span class="ct"> * Note: GRT includes extra infrastructure and instrumentation for prototyping</span></td></tr>
+<tr name="16" id="16">
+<td><a id="l16" class='ln'>16</a></td><td><span class="ct"> * Embedded hardware selection: Intel-&gt;x86-64 (Linux 64)</span></td></tr>
+<tr name="17" id="17">
+<td><a id="l17" class='ln'>17</a></td><td><span class="ct"> * Code generation objective: Execution efficiency</span></td></tr>
+<tr name="18" id="18">
+<td><a id="l18" class='ln'>18</a></td><td><span class="ct"> * Validation result: Not run</span></td></tr>
+<tr name="19" id="19">
+<td><a id="l19" class='ln'>19</a></td><td><span class="ct"> */</span></td></tr>
+<tr name="20" id="20">
+<td><a id="l20" class='ln'>20</a></td><td></td></tr>
+<tr name="21" id="21">
+<td><a id="l21" class='ln'>21</a></td><td><span class="pp">#include "estimate_lane_center.h"</span></td></tr>
+<tr name="22" id="22">
+<td><a id="l22" class='ln'>22</a></td><td><span class="pp">#include "estimate_lane_center_private.h"</span></td></tr>
+<tr name="23" id="23">
+<td><a id="l23" class='ln'>23</a></td><td></td></tr>
+<tr name="24" id="24">
+<td><a id="l24" class='ln'>24</a></td><td><span class="kw">const</span> <a id="24c7" class="tk">SL_Bus_estimate_lane_center_path_follower_lane</a></td></tr>
+<tr name="25" id="25">
+<td><a id="l25" class='ln'>25</a></td><td>  <a id="25c3" class="tk">estimate_lane_center_rtZSL_Bus_estimate_lane_center_path_follower_lane</a> = <span class="br">{</span></td></tr>
+<tr name="26" id="26">
+<td><a id="l26" class='ln'>26</a></td><td>  0.0F,                                <span class="ct">/* Strength */</span></td></tr>
+<tr name="27" id="27">
+<td><a id="l27" class='ln'>27</a></td><td>  0.0F,                                <span class="ct">/* RhoDot */</span></td></tr>
+<tr name="28" id="28">
+<td><a id="l28" class='ln'>28</a></td><td>  0.0F,                                <span class="ct">/* Rho */</span></td></tr>
+<tr name="29" id="29">
+<td><a id="l29" class='ln'>29</a></td><td>  0.0F,                                <span class="ct">/* Phi */</span></td></tr>
+<tr name="30" id="30">
+<td><a id="l30" class='ln'>30</a></td><td>  0.0F                                 <span class="ct">/* Y */</span></td></tr>
+<tr name="31" id="31">
+<td><a id="l31" class='ln'>31</a></td><td><span class="br">}</span> ;                  <span class="ct">/* SL_Bus_estimate_lane_center_path_follower_lane ground */</span></td></tr>
+<tr name="32" id="32">
+<td><a id="l32" class='ln'>32</a></td><td></td></tr>
+<tr name="33" id="33">
+<td><a id="l33" class='ln'>33</a></td><td><span class="ct">/* Block signals (default storage) */</span></td></tr>
+<tr name="34" id="34">
+<td><a id="l34" class='ln'>34</a></td><td><a id="34c1" class="tk">B_estimate_lane_center_T</a> <a id="34c26" class="tk">estimate_lane_center_B</a>;</td></tr>
+<tr name="35" id="35">
+<td><a id="l35" class='ln'>35</a></td><td></td></tr>
+<tr name="36" id="36">
+<td><a id="l36" class='ln'>36</a></td><td><span class="ct">/* Block states (default storage) */</span></td></tr>
+<tr name="37" id="37">
+<td><a id="l37" class='ln'>37</a></td><td><a id="37c1" class="tk">DW_estimate_lane_center_T</a> <a id="37c27" class="tk">estimate_lane_center_DW</a>;</td></tr>
+<tr name="38" id="38">
+<td><a id="l38" class='ln'>38</a></td><td></td></tr>
+<tr name="39" id="39">
+<td><a id="l39" class='ln'>39</a></td><td><span class="ct">/* Real-time model */</span></td></tr>
+<tr name="40" id="40">
+<td><a id="l40" class='ln'>40</a></td><td><a id="40c1" class="tk">RT_MODEL_estimate_lane_center_T</a> <a id="40c33" class="tk">estimate_lane_center_M_</a>;</td></tr>
+<tr name="41" id="41">
+<td><a id="l41" class='ln'>41</a></td><td><a id="41c1" class="tk">RT_MODEL_estimate_lane_center_T</a> <a id="41c33" class="tk">*</a><span class="kw">const</span> <a id="41c40" class="tk">estimate_lane_center_M</a> =</td></tr>
+<tr name="42" id="42">
+<td><a id="l42" class='ln'>42</a></td><td>  <a id="42c3" class="tk">&amp;</a><a id="42c4" class="tk">estimate_lane_center_M_</a>;</td></tr>
+<tr name="43" id="43">
+<td><a id="l43" class='ln'>43</a></td><td></td></tr>
+<tr name="44" id="44">
+<td><a id="l44" class='ln'>44</a></td><td><span class="ct">/* Forward declaration for local functions */</span></td></tr>
+<tr name="45" id="45">
+<td><a id="l45" class='ln'>45</a></td><td><span class="kw">static</span> <span class="kw">void</span> <a id="45c13" class="tk">estimate_lane_center_matlabCodegenHandle_matlabCodegenDestructor_k</a></td></tr>
+<tr name="46" id="46">
+<td><a id="l46" class='ln'>46</a></td><td>  (<a id="46c4" class="tk">ros_slros_internal_block_Subscriber_estimate_lane_center_T</a> <a id="46c63" class="tk">*</a><a id="46c64" class="tk">obj</a>);</td></tr>
+<tr name="47" id="47">
+<td><a id="l47" class='ln'>47</a></td><td><span class="kw">static</span> <span class="kw">void</span> <a id="47c13" class="tk">estimate_lane_center_SystemCore_release</a></td></tr>
+<tr name="48" id="48">
+<td><a id="l48" class='ln'>48</a></td><td>  (<a id="48c4" class="tk">dsp_simulink_MovingAverage_estimate_lane_center_T</a> <a id="48c54" class="tk">*</a><a id="48c55" class="tk">obj</a>);</td></tr>
+<tr name="49" id="49">
+<td><a id="l49" class='ln'>49</a></td><td><span class="kw">static</span> <span class="kw">void</span> <a id="49c13" class="tk">estimate_lane_center_SystemCore_delete</a></td></tr>
+<tr name="50" id="50">
+<td><a id="l50" class='ln'>50</a></td><td>  (<a id="50c4" class="tk">dsp_simulink_MovingAverage_estimate_lane_center_T</a> <a id="50c54" class="tk">*</a><a id="50c55" class="tk">obj</a>);</td></tr>
+<tr name="51" id="51">
+<td><a id="l51" class='ln'>51</a></td><td><span class="kw">static</span> <span class="kw">void</span> <a id="51c13" class="tk">estimate_lane_center_matlabCodegenHandle_matlabCodegenDestructor</a></td></tr>
+<tr name="52" id="52">
+<td><a id="l52" class='ln'>52</a></td><td>  (<a id="52c4" class="tk">dsp_simulink_MovingAverage_estimate_lane_center_T</a> <a id="52c54" class="tk">*</a><a id="52c55" class="tk">obj</a>);</td></tr>
+<tr name="53" id="53">
+<td><a id="l53" class='ln'>53</a></td><td></td></tr>
+<tr name="54" id="54">
+<td><a id="l54" class='ln'>54</a></td><td><span class="ct">/*</span></td></tr>
+<tr name="55" id="55">
+<td><a id="l55" class='ln'>55</a></td><td><span class="ct"> * System initialize for enable system:</span></td></tr>
+<tr name="56" id="56">
+<td><a id="l56" class='ln'>56</a></td><td><span class="ct"> *    '&lt;S5&gt;/Enabled Subsystem'</span></td></tr>
+<tr name="57" id="57">
+<td><a id="l57" class='ln'>57</a></td><td><span class="ct"> *    '&lt;S6&gt;/Enabled Subsystem'</span></td></tr>
+<tr name="58" id="58">
+<td><a id="l58" class='ln'>58</a></td><td><span class="ct"> */</span></td></tr>
+<tr name="59" id="59">
+<td><a id="l59" class='ln'>59</a></td><td><span class="kw">void</span> <a id="59c6" class="tk">estimate_lane_center_EnabledSubsystem_Init</a></td></tr>
+<tr name="60" id="60">
+<td><a id="l60" class='ln'>60</a></td><td>  (<a id="60c4" class="tk">B_EnabledSubsystem_estimate_lane_center_T</a> <a id="60c46" class="tk">*</a><a id="60c47" class="tk">localB</a>)</td></tr>
+<tr name="61" id="61">
+<td><a id="l61" class='ln'>61</a></td><td><span class="br">{</span></td></tr>
+<tr name="62" id="62">
+<td><a id="l62" class='ln'>62</a></td><td>  <span class="ct">/* SystemInitialize for Outport: '&lt;S14&gt;/Out1' */</span></td></tr>
+<tr name="63" id="63">
+<td><a id="l63" class='ln'>63</a></td><td>  <a id="63c3" class="tk">localB</a>-&gt;<a id="63c11" class="tk">In1</a> =</td></tr>
+<tr name="64" id="64">
+<td><a id="l64" class='ln'>64</a></td><td>    <a id="64c5" class="tk">estimate_lane_center_rtZSL_Bus_estimate_lane_center_path_follower_lane</a>;</td></tr>
+<tr name="65" id="65">
+<td><a id="l65" class='ln'>65</a></td><td><span class="br">}</span></td></tr>
+<tr name="66" id="66">
+<td><a id="l66" class='ln'>66</a></td><td></td></tr>
+<tr name="67" id="67">
+<td><a id="l67" class='ln'>67</a></td><td><span class="ct">/*</span></td></tr>
+<tr name="68" id="68">
+<td><a id="l68" class='ln'>68</a></td><td><span class="ct"> * Output and update for enable system:</span></td></tr>
+<tr name="69" id="69">
+<td><a id="l69" class='ln'>69</a></td><td><span class="ct"> *    '&lt;S5&gt;/Enabled Subsystem'</span></td></tr>
+<tr name="70" id="70">
+<td><a id="l70" class='ln'>70</a></td><td><span class="ct"> *    '&lt;S6&gt;/Enabled Subsystem'</span></td></tr>
+<tr name="71" id="71">
+<td><a id="l71" class='ln'>71</a></td><td><span class="ct"> */</span></td></tr>
+<tr name="72" id="72">
+<td><a id="l72" class='ln'>72</a></td><td><span class="kw">void</span> <a id="72c6" class="tk">estimate_lane_center_EnabledSubsystem</a>(<a id="72c44" class="tk">boolean_T</a> <a id="72c54" class="tk">rtu_Enable</a>, <span class="kw">const</span></td></tr>
+<tr name="73" id="73">
+<td><a id="l73" class='ln'>73</a></td><td>  <a id="73c3" class="tk">SL_Bus_estimate_lane_center_path_follower_lane</a> <a id="73c50" class="tk">*</a><a id="73c51" class="tk">rtu_In1</a>,</td></tr>
+<tr name="74" id="74">
+<td><a id="l74" class='ln'>74</a></td><td>  <a id="74c3" class="tk">B_EnabledSubsystem_estimate_lane_center_T</a> <a id="74c45" class="tk">*</a><a id="74c46" class="tk">localB</a>)</td></tr>
+<tr name="75" id="75">
+<td><a id="l75" class='ln'>75</a></td><td><span class="br">{</span></td></tr>
+<tr name="76" id="76">
+<td><a id="l76" class='ln'>76</a></td><td>  <span class="ct">/* Outputs for Enabled SubSystem: '&lt;S5&gt;/Enabled Subsystem' incorporates:</span></td></tr>
+<tr name="77" id="77">
+<td><a id="l77" class='ln'>77</a></td><td><span class="ct">   *  EnablePort: '&lt;S14&gt;/Enable'</span></td></tr>
+<tr name="78" id="78">
+<td><a id="l78" class='ln'>78</a></td><td><span class="ct">   */</span></td></tr>
+<tr name="79" id="79">
+<td><a id="l79" class='ln'>79</a></td><td>  <span class="kw">if</span> (<a id="79c7" class="tk">rtu_Enable</a>) <span class="br">{</span></td></tr>
+<tr name="80" id="80">
+<td><a id="l80" class='ln'>80</a></td><td>    <span class="ct">/* Inport: '&lt;S14&gt;/In1' */</span></td></tr>
+<tr name="81" id="81">
+<td><a id="l81" class='ln'>81</a></td><td>    <a id="81c5" class="tk">localB</a>-&gt;<a id="81c13" class="tk">In1</a> = <a id="81c19" class="tk">*</a><a id="81c20" class="tk">rtu_In1</a>;</td></tr>
+<tr name="82" id="82">
+<td><a id="l82" class='ln'>82</a></td><td>  <span class="br">}</span></td></tr>
+<tr name="83" id="83">
+<td><a id="l83" class='ln'>83</a></td><td></td></tr>
+<tr name="84" id="84">
+<td><a id="l84" class='ln'>84</a></td><td>  <span class="ct">/* End of Outputs for SubSystem: '&lt;S5&gt;/Enabled Subsystem' */</span></td></tr>
+<tr name="85" id="85">
+<td><a id="l85" class='ln'>85</a></td><td><span class="br">}</span></td></tr>
+<tr name="86" id="86">
+<td><a id="l86" class='ln'>86</a></td><td></td></tr>
+<tr name="87" id="87">
+<td><a id="l87" class='ln'>87</a></td><td><span class="kw">static</span> <span class="kw">void</span> <a id="87c13" class="tk">estimate_lane_center_matlabCodegenHandle_matlabCodegenDestructor_k</a></td></tr>
+<tr name="88" id="88">
+<td><a id="l88" class='ln'>88</a></td><td>  (<a id="88c4" class="tk">ros_slros_internal_block_Subscriber_estimate_lane_center_T</a> <a id="88c63" class="tk">*</a><a id="88c64" class="tk">obj</a>)</td></tr>
+<tr name="89" id="89">
+<td><a id="l89" class='ln'>89</a></td><td><span class="br">{</span></td></tr>
+<tr name="90" id="90">
+<td><a id="l90" class='ln'>90</a></td><td>  <span class="kw">if</span> (<a id="90c7" class="tk">!</a><a id="90c8" class="tk">obj</a>-&gt;<a id="90c13" class="tk">matlabCodegenIsDeleted</a>) <span class="br">{</span></td></tr>
+<tr name="91" id="91">
+<td><a id="l91" class='ln'>91</a></td><td>    <a id="91c5" class="tk">obj</a>-&gt;<a id="91c10" class="tk">matlabCodegenIsDeleted</a> = true;</td></tr>
+<tr name="92" id="92">
+<td><a id="l92" class='ln'>92</a></td><td>  <span class="br">}</span></td></tr>
+<tr name="93" id="93">
+<td><a id="l93" class='ln'>93</a></td><td><span class="br">}</span></td></tr>
+<tr name="94" id="94">
+<td><a id="l94" class='ln'>94</a></td><td></td></tr>
+<tr name="95" id="95">
+<td><a id="l95" class='ln'>95</a></td><td><span class="kw">static</span> <span class="kw">void</span> <a id="95c13" class="tk">estimate_lane_center_SystemCore_release</a></td></tr>
+<tr name="96" id="96">
+<td><a id="l96" class='ln'>96</a></td><td>  (<a id="96c4" class="tk">dsp_simulink_MovingAverage_estimate_lane_center_T</a> <a id="96c54" class="tk">*</a><a id="96c55" class="tk">obj</a>)</td></tr>
+<tr name="97" id="97">
+<td><a id="l97" class='ln'>97</a></td><td><span class="br">{</span></td></tr>
+<tr name="98" id="98">
+<td><a id="l98" class='ln'>98</a></td><td>  <a id="98c3" class="tk">dsp_private_SlidingWindowAverageCG_estimate_lane_center_T</a> <a id="98c61" class="tk">*</a><a id="98c62" class="tk">obj_0</a>;</td></tr>
+<tr name="99" id="99">
+<td><a id="l99" class='ln'>99</a></td><td>  <span class="kw">if</span> ((<a id="99c8" class="tk">obj</a>-&gt;<a id="99c13" class="tk">isInitialized</a> <a id="99c27" class="tk">==</a> 1) <a id="99c33" class="tk">&amp;&amp;</a> <a id="99c36" class="tk">obj</a>-&gt;<a id="99c41" class="tk">isSetupComplete</a>) <span class="br">{</span></td></tr>
+<tr name="100" id="100">
+<td><a id="l100" class='ln'>100</a></td><td>    <a id="100c5" class="tk">obj_0</a> = <a id="100c13" class="tk">obj</a>-&gt;<a id="100c18" class="tk">pStatistic</a>;</td></tr>
+<tr name="101" id="101">
+<td><a id="l101" class='ln'>101</a></td><td>    <span class="kw">if</span> (<a id="101c9" class="tk">obj_0</a>-&gt;<a id="101c16" class="tk">isInitialized</a> <a id="101c30" class="tk">==</a> 1) <span class="br">{</span></td></tr>
+<tr name="102" id="102">
+<td><a id="l102" class='ln'>102</a></td><td>      <a id="102c7" class="tk">obj_0</a>-&gt;<a id="102c14" class="tk">isInitialized</a> = 2;</td></tr>
+<tr name="103" id="103">
+<td><a id="l103" class='ln'>103</a></td><td>    <span class="br">}</span></td></tr>
+<tr name="104" id="104">
+<td><a id="l104" class='ln'>104</a></td><td></td></tr>
+<tr name="105" id="105">
+<td><a id="l105" class='ln'>105</a></td><td>    <a id="105c5" class="tk">obj</a>-&gt;<a id="105c10" class="tk">NumChannels</a> = <a id="105c24" class="tk">-</a>1;</td></tr>
+<tr name="106" id="106">
+<td><a id="l106" class='ln'>106</a></td><td>  <span class="br">}</span></td></tr>
+<tr name="107" id="107">
+<td><a id="l107" class='ln'>107</a></td><td><span class="br">}</span></td></tr>
+<tr name="108" id="108">
+<td><a id="l108" class='ln'>108</a></td><td></td></tr>
+<tr name="109" id="109">
+<td><a id="l109" class='ln'>109</a></td><td><span class="kw">static</span> <span class="kw">void</span> <a id="109c13" class="tk">estimate_lane_center_SystemCore_delete</a></td></tr>
+<tr name="110" id="110">
+<td><a id="l110" class='ln'>110</a></td><td>  (<a id="110c4" class="tk">dsp_simulink_MovingAverage_estimate_lane_center_T</a> <a id="110c54" class="tk">*</a><a id="110c55" class="tk">obj</a>)</td></tr>
+<tr name="111" id="111">
+<td><a id="l111" class='ln'>111</a></td><td><span class="br">{</span></td></tr>
+<tr name="112" id="112">
+<td><a id="l112" class='ln'>112</a></td><td>  <a id="112c3" class="tk">estimate_lane_center_SystemCore_release</a>(<a id="112c43" class="tk">obj</a>);</td></tr>
+<tr name="113" id="113">
+<td><a id="l113" class='ln'>113</a></td><td><span class="br">}</span></td></tr>
+<tr name="114" id="114">
+<td><a id="l114" class='ln'>114</a></td><td></td></tr>
+<tr name="115" id="115">
+<td><a id="l115" class='ln'>115</a></td><td><span class="kw">static</span> <span class="kw">void</span> <a id="115c13" class="tk">estimate_lane_center_matlabCodegenHandle_matlabCodegenDestructor</a></td></tr>
+<tr name="116" id="116">
+<td><a id="l116" class='ln'>116</a></td><td>  (<a id="116c4" class="tk">dsp_simulink_MovingAverage_estimate_lane_center_T</a> <a id="116c54" class="tk">*</a><a id="116c55" class="tk">obj</a>)</td></tr>
+<tr name="117" id="117">
+<td><a id="l117" class='ln'>117</a></td><td><span class="br">{</span></td></tr>
+<tr name="118" id="118">
+<td><a id="l118" class='ln'>118</a></td><td>  <span class="kw">if</span> (<a id="118c7" class="tk">!</a><a id="118c8" class="tk">obj</a>-&gt;<a id="118c13" class="tk">matlabCodegenIsDeleted</a>) <span class="br">{</span></td></tr>
+<tr name="119" id="119">
+<td><a id="l119" class='ln'>119</a></td><td>    <a id="119c5" class="tk">obj</a>-&gt;<a id="119c10" class="tk">matlabCodegenIsDeleted</a> = true;</td></tr>
+<tr name="120" id="120">
+<td><a id="l120" class='ln'>120</a></td><td>    <a id="120c5" class="tk">estimate_lane_center_SystemCore_delete</a>(<a id="120c44" class="tk">obj</a>);</td></tr>
+<tr name="121" id="121">
+<td><a id="l121" class='ln'>121</a></td><td>  <span class="br">}</span></td></tr>
+<tr name="122" id="122">
+<td><a id="l122" class='ln'>122</a></td><td><span class="br">}</span></td></tr>
+<tr name="123" id="123">
+<td><a id="l123" class='ln'>123</a></td><td></td></tr>
+<tr name="124" id="124">
+<td><a id="l124" class='ln'>124</a></td><td><span class="ct">/* Model output function */</span></td></tr>
+<tr name="125" id="125">
+<td><a id="l125" class='ln'>125</a></td><td><span class="kw">void</span> <a id="125c6" class="tk">estimate_lane_center_output</a>(<span class="kw">void</span>)</td></tr>
+<tr name="126" id="126">
+<td><a id="l126" class='ln'>126</a></td><td><span class="br">{</span></td></tr>
+<tr name="127" id="127">
+<td><a id="l127" class='ln'>127</a></td><td>  <a id="127c3" class="tk">real_T</a> <a id="127c10" class="tk">cumRevIndex</a>;</td></tr>
+<tr name="128" id="128">
+<td><a id="l128" class='ln'>128</a></td><td>  <a id="128c3" class="tk">real_T</a> <a id="128c10" class="tk">csum</a>;</td></tr>
+<tr name="129" id="129">
+<td><a id="l129" class='ln'>129</a></td><td>  <a id="129c3" class="tk">real_T</a> <a id="129c10" class="tk">csumrev</a>[3];</td></tr>
+<tr name="130" id="130">
+<td><a id="l130" class='ln'>130</a></td><td>  <a id="130c3" class="tk">int32_T</a> <a id="130c11" class="tk">c_index</a>;</td></tr>
+<tr name="131" id="131">
+<td><a id="l131" class='ln'>131</a></td><td>  <a id="131c3" class="tk">SL_Bus_estimate_lane_center_path_follower_lane</a> <a id="131c50" class="tk">b_varargout_2</a>;</td></tr>
+<tr name="132" id="132">
+<td><a id="l132" class='ln'>132</a></td><td></td></tr>
+<tr name="133" id="133">
+<td><a id="l133" class='ln'>133</a></td><td>  <span class="ct">/* Outputs for Atomic SubSystem: '&lt;S2&gt;/Subscribe' */</span></td></tr>
+<tr name="134" id="134">
+<td><a id="l134" class='ln'>134</a></td><td>  <span class="ct">/* MATLABSystem: '&lt;S5&gt;/SourceBlock' */</span></td></tr>
+<tr name="135" id="135">
+<td><a id="l135" class='ln'>135</a></td><td>  <a id="135c3" class="tk">estimate_lane_center_B</a>.<a id="135c26" class="tk">SourceBlock_o1_a</a> =</td></tr>
+<tr name="136" id="136">
+<td><a id="l136" class='ln'>136</a></td><td>    <a id="136c5" class="tk">Sub_estimate_lane_center_1131</a>.<a id="136c35" class="tk">getLatestMessage</a>(<a id="136c52" class="tk">&amp;</a><a id="136c53" class="tk">b_varargout_2</a>);</td></tr>
+<tr name="137" id="137">
+<td><a id="l137" class='ln'>137</a></td><td></td></tr>
+<tr name="138" id="138">
+<td><a id="l138" class='ln'>138</a></td><td>  <span class="ct">/* Outputs for Enabled SubSystem: '&lt;S5&gt;/Enabled Subsystem' */</span></td></tr>
+<tr name="139" id="139">
+<td><a id="l139" class='ln'>139</a></td><td>  <a id="139c3" class="tk">estimate_lane_center_EnabledSubsystem</a>(<a id="139c41" class="tk">estimate_lane_center_B</a>.<a id="139c64" class="tk">SourceBlock_o1_a</a>,</td></tr>
+<tr name="140" id="140">
+<td><a id="l140" class='ln'>140</a></td><td>    <a id="140c5" class="tk">&amp;</a><a id="140c6" class="tk">b_varargout_2</a>, <a id="140c21" class="tk">&amp;</a><a id="140c22" class="tk">estimate_lane_center_B</a>.<a id="140c45" class="tk">EnabledSubsystem</a>);</td></tr>
+<tr name="141" id="141">
+<td><a id="l141" class='ln'>141</a></td><td></td></tr>
+<tr name="142" id="142">
+<td><a id="l142" class='ln'>142</a></td><td>  <span class="ct">/* End of Outputs for SubSystem: '&lt;S5&gt;/Enabled Subsystem' */</span></td></tr>
+<tr name="143" id="143">
+<td><a id="l143" class='ln'>143</a></td><td>  <span class="ct">/* End of Outputs for SubSystem: '&lt;S2&gt;/Subscribe' */</span></td></tr>
+<tr name="144" id="144">
+<td><a id="l144" class='ln'>144</a></td><td></td></tr>
+<tr name="145" id="145">
+<td><a id="l145" class='ln'>145</a></td><td>  <span class="ct">/* SignalConversion generated from: '&lt;S2&gt;/Bus Selector' */</span></td></tr>
+<tr name="146" id="146">
+<td><a id="l146" class='ln'>146</a></td><td>  <a id="146c3" class="tk">estimate_lane_center_B</a>.<a id="146c26" class="tk">Y</a> = <a id="146c30" class="tk">estimate_lane_center_B</a>.<a id="146c53" class="tk">EnabledSubsystem</a>.<a id="146c70" class="tk">In1</a>.<a id="146c74" class="tk">Y</a>;</td></tr>
+<tr name="147" id="147">
+<td><a id="l147" class='ln'>147</a></td><td></td></tr>
+<tr name="148" id="148">
+<td><a id="l148" class='ln'>148</a></td><td>  <span class="ct">/* Outputs for Atomic SubSystem: '&lt;S2&gt;/Subscribe1' */</span></td></tr>
+<tr name="149" id="149">
+<td><a id="l149" class='ln'>149</a></td><td>  <span class="ct">/* MATLABSystem: '&lt;S6&gt;/SourceBlock' */</span></td></tr>
+<tr name="150" id="150">
+<td><a id="l150" class='ln'>150</a></td><td>  <a id="150c3" class="tk">estimate_lane_center_B</a>.<a id="150c26" class="tk">SourceBlock_o1</a> =</td></tr>
+<tr name="151" id="151">
+<td><a id="l151" class='ln'>151</a></td><td>    <a id="151c5" class="tk">Sub_estimate_lane_center_1134</a>.<a id="151c35" class="tk">getLatestMessage</a>(<a id="151c52" class="tk">&amp;</a><a id="151c53" class="tk">b_varargout_2</a>);</td></tr>
+<tr name="152" id="152">
+<td><a id="l152" class='ln'>152</a></td><td></td></tr>
+<tr name="153" id="153">
+<td><a id="l153" class='ln'>153</a></td><td>  <span class="ct">/* Outputs for Enabled SubSystem: '&lt;S6&gt;/Enabled Subsystem' */</span></td></tr>
+<tr name="154" id="154">
+<td><a id="l154" class='ln'>154</a></td><td>  <a id="154c3" class="tk">estimate_lane_center_EnabledSubsystem</a>(<a id="154c41" class="tk">estimate_lane_center_B</a>.<a id="154c64" class="tk">SourceBlock_o1</a>,</td></tr>
+<tr name="155" id="155">
+<td><a id="l155" class='ln'>155</a></td><td>    <a id="155c5" class="tk">&amp;</a><a id="155c6" class="tk">b_varargout_2</a>, <a id="155c21" class="tk">&amp;</a><a id="155c22" class="tk">estimate_lane_center_B</a>.<a id="155c45" class="tk">EnabledSubsystem_l</a>);</td></tr>
+<tr name="156" id="156">
+<td><a id="l156" class='ln'>156</a></td><td></td></tr>
+<tr name="157" id="157">
+<td><a id="l157" class='ln'>157</a></td><td>  <span class="ct">/* End of Outputs for SubSystem: '&lt;S6&gt;/Enabled Subsystem' */</span></td></tr>
+<tr name="158" id="158">
+<td><a id="l158" class='ln'>158</a></td><td>  <span class="ct">/* End of Outputs for SubSystem: '&lt;S2&gt;/Subscribe1' */</span></td></tr>
+<tr name="159" id="159">
+<td><a id="l159" class='ln'>159</a></td><td></td></tr>
+<tr name="160" id="160">
+<td><a id="l160" class='ln'>160</a></td><td>  <span class="ct">/* SignalConversion generated from: '&lt;S2&gt;/Bus Selector1' */</span></td></tr>
+<tr name="161" id="161">
+<td><a id="l161" class='ln'>161</a></td><td>  <a id="161c3" class="tk">estimate_lane_center_B</a>.<a id="161c26" class="tk">Phi</a> = <a id="161c32" class="tk">estimate_lane_center_B</a>.<a id="161c55" class="tk">EnabledSubsystem_l</a>.<a id="161c74" class="tk">In1</a>.<a id="161c78" class="tk">Phi</a>;</td></tr>
+<tr name="162" id="162">
+<td><a id="l162" class='ln'>162</a></td><td></td></tr>
+<tr name="163" id="163">
+<td><a id="l163" class='ln'>163</a></td><td>  <span class="ct">/* Outputs for Atomic SubSystem: '&lt;S2&gt;/Estimate Lane Center' */</span></td></tr>
+<tr name="164" id="164">
+<td><a id="l164" class='ln'>164</a></td><td>  <span class="ct">/* Constant: '&lt;Root&gt;/Velocity' */</span></td></tr>
+<tr name="165" id="165">
+<td><a id="l165" class='ln'>165</a></td><td>  <a id="165c3" class="tk">estimate_lane_center_EstimateLaneCenter</a>(3.0,</td></tr>
+<tr name="166" id="166">
+<td><a id="l166" class='ln'>166</a></td><td>    <a id="166c5" class="tk">estimate_lane_center_B</a>.<a id="166c28" class="tk">EnabledSubsystem</a>.<a id="166c45" class="tk">In1</a>.<a id="166c49" class="tk">Strength</a>,</td></tr>
+<tr name="167" id="167">
+<td><a id="l167" class='ln'>167</a></td><td>    <a id="167c5" class="tk">estimate_lane_center_B</a>.<a id="167c28" class="tk">EnabledSubsystem</a>.<a id="167c45" class="tk">In1</a>.<a id="167c49" class="tk">RhoDot</a>,</td></tr>
+<tr name="168" id="168">
+<td><a id="l168" class='ln'>168</a></td><td>    <a id="168c5" class="tk">estimate_lane_center_B</a>.<a id="168c28" class="tk">EnabledSubsystem</a>.<a id="168c45" class="tk">In1</a>.<a id="168c49" class="tk">Rho</a>,</td></tr>
+<tr name="169" id="169">
+<td><a id="l169" class='ln'>169</a></td><td>    <a id="169c5" class="tk">estimate_lane_center_B</a>.<a id="169c28" class="tk">EnabledSubsystem</a>.<a id="169c45" class="tk">In1</a>.<a id="169c49" class="tk">Phi</a>, <a id="169c54" class="tk">estimate_lane_center_B</a>.<a id="169c77" class="tk">Y</a>,</td></tr>
+<tr name="170" id="170">
+<td><a id="l170" class='ln'>170</a></td><td>    <a id="170c5" class="tk">estimate_lane_center_B</a>.<a id="170c28" class="tk">EnabledSubsystem_l</a>.<a id="170c47" class="tk">In1</a>.<a id="170c51" class="tk">Strength</a>,</td></tr>
+<tr name="171" id="171">
+<td><a id="l171" class='ln'>171</a></td><td>    <a id="171c5" class="tk">estimate_lane_center_B</a>.<a id="171c28" class="tk">EnabledSubsystem_l</a>.<a id="171c47" class="tk">In1</a>.<a id="171c51" class="tk">RhoDot</a>,</td></tr>
+<tr name="172" id="172">
+<td><a id="l172" class='ln'>172</a></td><td>    <a id="172c5" class="tk">estimate_lane_center_B</a>.<a id="172c28" class="tk">EnabledSubsystem_l</a>.<a id="172c47" class="tk">In1</a>.<a id="172c51" class="tk">Rho</a>,</td></tr>
+<tr name="173" id="173">
+<td><a id="l173" class='ln'>173</a></td><td>    <a id="173c5" class="tk">estimate_lane_center_B</a>.<a id="173c28" class="tk">Phi</a>, <a id="173c33" class="tk">estimate_lane_center_B</a>.<a id="173c56" class="tk">EnabledSubsystem_l</a>.<a id="173c75" class="tk">In1</a>.<a id="173c79" class="tk">Y</a>,</td></tr>
+<tr name="174" id="174">
+<td><a id="l174" class='ln'>174</a></td><td>    <a id="174c5" class="tk">&amp;</a><a id="174c6" class="tk">estimate_lane_center_B</a>.<a id="174c29" class="tk">EstimateLaneCenter</a>,</td></tr>
+<tr name="175" id="175">
+<td><a id="l175" class='ln'>175</a></td><td>    <a id="175c5" class="tk">&amp;</a><a id="175c6" class="tk">estimate_lane_center_DW</a>.<a id="175c30" class="tk">EstimateLaneCenter</a>);</td></tr>
+<tr name="176" id="176">
+<td><a id="l176" class='ln'>176</a></td><td></td></tr>
+<tr name="177" id="177">
+<td><a id="l177" class='ln'>177</a></td><td>  <span class="ct">/* End of Outputs for SubSystem: '&lt;S2&gt;/Estimate Lane Center' */</span></td></tr>
+<tr name="178" id="178">
+<td><a id="l178" class='ln'>178</a></td><td></td></tr>
+<tr name="179" id="179">
+<td><a id="l179" class='ln'>179</a></td><td>  <span class="ct">/* MATLABSystem: '&lt;S2&gt;/Moving Average' */</span></td></tr>
+<tr name="180" id="180">
+<td><a id="l180" class='ln'>180</a></td><td>  <span class="kw">if</span> (<a id="180c7" class="tk">estimate_lane_center_DW</a>.<a id="180c31" class="tk">obj</a>.<a id="180c35" class="tk">TunablePropsChanged</a>) <span class="br">{</span></td></tr>
+<tr name="181" id="181">
+<td><a id="l181" class='ln'>181</a></td><td>    <a id="181c5" class="tk">estimate_lane_center_DW</a>.<a id="181c29" class="tk">obj</a>.<a id="181c33" class="tk">TunablePropsChanged</a> = false;</td></tr>
+<tr name="182" id="182">
+<td><a id="l182" class='ln'>182</a></td><td>  <span class="br">}</span></td></tr>
+<tr name="183" id="183">
+<td><a id="l183" class='ln'>183</a></td><td></td></tr>
+<tr name="184" id="184">
+<td><a id="l184" class='ln'>184</a></td><td>  <span class="kw">if</span> (<a id="184c7" class="tk">estimate_lane_center_DW</a>.<a id="184c31" class="tk">obj</a>.<a id="184c35" class="tk">pStatistic</a>-&gt;<a id="184c47" class="tk">isInitialized</a> <a id="184c61" class="tk">!=</a> 1) <span class="br">{</span></td></tr>
+<tr name="185" id="185">
+<td><a id="l185" class='ln'>185</a></td><td>    <a id="185c5" class="tk">estimate_lane_center_DW</a>.<a id="185c29" class="tk">obj</a>.<a id="185c33" class="tk">pStatistic</a>-&gt;<a id="185c45" class="tk">isSetupComplete</a> = false;</td></tr>
+<tr name="186" id="186">
+<td><a id="l186" class='ln'>186</a></td><td>    <a id="186c5" class="tk">estimate_lane_center_DW</a>.<a id="186c29" class="tk">obj</a>.<a id="186c33" class="tk">pStatistic</a>-&gt;<a id="186c45" class="tk">isInitialized</a> = 1;</td></tr>
+<tr name="187" id="187">
+<td><a id="l187" class='ln'>187</a></td><td>    <a id="187c5" class="tk">estimate_lane_center_DW</a>.<a id="187c29" class="tk">obj</a>.<a id="187c33" class="tk">pStatistic</a>-&gt;<a id="187c45" class="tk">pCumSum</a> = 0.0;</td></tr>
+<tr name="188" id="188">
+<td><a id="l188" class='ln'>188</a></td><td>    <a id="188c5" class="tk">estimate_lane_center_DW</a>.<a id="188c29" class="tk">obj</a>.<a id="188c33" class="tk">pStatistic</a>-&gt;<a id="188c45" class="tk">pCumRevIndex</a> = 1.0;</td></tr>
+<tr name="189" id="189">
+<td><a id="l189" class='ln'>189</a></td><td>    <a id="189c5" class="tk">estimate_lane_center_DW</a>.<a id="189c29" class="tk">obj</a>.<a id="189c33" class="tk">pStatistic</a>-&gt;<a id="189c45" class="tk">isSetupComplete</a> = true;</td></tr>
+<tr name="190" id="190">
+<td><a id="l190" class='ln'>190</a></td><td>    <a id="190c5" class="tk">estimate_lane_center_DW</a>.<a id="190c29" class="tk">obj</a>.<a id="190c33" class="tk">pStatistic</a>-&gt;<a id="190c45" class="tk">pCumSum</a> = 0.0;</td></tr>
+<tr name="191" id="191">
+<td><a id="l191" class='ln'>191</a></td><td>    <a id="191c5" class="tk">estimate_lane_center_DW</a>.<a id="191c29" class="tk">obj</a>.<a id="191c33" class="tk">pStatistic</a>-&gt;<a id="191c45" class="tk">pCumSumRev</a>[0] = 0.0;</td></tr>
+<tr name="192" id="192">
+<td><a id="l192" class='ln'>192</a></td><td>    <a id="192c5" class="tk">estimate_lane_center_DW</a>.<a id="192c29" class="tk">obj</a>.<a id="192c33" class="tk">pStatistic</a>-&gt;<a id="192c45" class="tk">pCumSumRev</a>[0] = 0.0;</td></tr>
+<tr name="193" id="193">
+<td><a id="l193" class='ln'>193</a></td><td>    <a id="193c5" class="tk">estimate_lane_center_DW</a>.<a id="193c29" class="tk">obj</a>.<a id="193c33" class="tk">pStatistic</a>-&gt;<a id="193c45" class="tk">pCumSumRev</a>[1] = 0.0;</td></tr>
+<tr name="194" id="194">
+<td><a id="l194" class='ln'>194</a></td><td>    <a id="194c5" class="tk">estimate_lane_center_DW</a>.<a id="194c29" class="tk">obj</a>.<a id="194c33" class="tk">pStatistic</a>-&gt;<a id="194c45" class="tk">pCumSumRev</a>[1] = 0.0;</td></tr>
+<tr name="195" id="195">
+<td><a id="l195" class='ln'>195</a></td><td>    <a id="195c5" class="tk">estimate_lane_center_DW</a>.<a id="195c29" class="tk">obj</a>.<a id="195c33" class="tk">pStatistic</a>-&gt;<a id="195c45" class="tk">pCumSumRev</a>[2] = 0.0;</td></tr>
+<tr name="196" id="196">
+<td><a id="l196" class='ln'>196</a></td><td>    <a id="196c5" class="tk">estimate_lane_center_DW</a>.<a id="196c29" class="tk">obj</a>.<a id="196c33" class="tk">pStatistic</a>-&gt;<a id="196c45" class="tk">pCumSumRev</a>[2] = 0.0;</td></tr>
+<tr name="197" id="197">
+<td><a id="l197" class='ln'>197</a></td><td>    <a id="197c5" class="tk">estimate_lane_center_DW</a>.<a id="197c29" class="tk">obj</a>.<a id="197c33" class="tk">pStatistic</a>-&gt;<a id="197c45" class="tk">pCumRevIndex</a> = 1.0;</td></tr>
+<tr name="198" id="198">
+<td><a id="l198" class='ln'>198</a></td><td>  <span class="br">}</span></td></tr>
+<tr name="199" id="199">
+<td><a id="l199" class='ln'>199</a></td><td></td></tr>
+<tr name="200" id="200">
+<td><a id="l200" class='ln'>200</a></td><td>  <a id="200c3" class="tk">cumRevIndex</a> = <a id="200c17" class="tk">estimate_lane_center_DW</a>.<a id="200c41" class="tk">obj</a>.<a id="200c45" class="tk">pStatistic</a>-&gt;<a id="200c57" class="tk">pCumRevIndex</a>;</td></tr>
+<tr name="201" id="201">
+<td><a id="l201" class='ln'>201</a></td><td>  <a id="201c3" class="tk">csum</a> = <a id="201c10" class="tk">estimate_lane_center_DW</a>.<a id="201c34" class="tk">obj</a>.<a id="201c38" class="tk">pStatistic</a>-&gt;<a id="201c50" class="tk">pCumSum</a>;</td></tr>
+<tr name="202" id="202">
+<td><a id="l202" class='ln'>202</a></td><td>  <a id="202c3" class="tk">csumrev</a>[0] = <a id="202c16" class="tk">estimate_lane_center_DW</a>.<a id="202c40" class="tk">obj</a>.<a id="202c44" class="tk">pStatistic</a>-&gt;<a id="202c56" class="tk">pCumSumRev</a>[0];</td></tr>
+<tr name="203" id="203">
+<td><a id="l203" class='ln'>203</a></td><td>  <a id="203c3" class="tk">csumrev</a>[1] = <a id="203c16" class="tk">estimate_lane_center_DW</a>.<a id="203c40" class="tk">obj</a>.<a id="203c44" class="tk">pStatistic</a>-&gt;<a id="203c56" class="tk">pCumSumRev</a>[1];</td></tr>
+<tr name="204" id="204">
+<td><a id="l204" class='ln'>204</a></td><td>  <a id="204c3" class="tk">csumrev</a>[2] = <a id="204c16" class="tk">estimate_lane_center_DW</a>.<a id="204c40" class="tk">obj</a>.<a id="204c44" class="tk">pStatistic</a>-&gt;<a id="204c56" class="tk">pCumSumRev</a>[2];</td></tr>
+<tr name="205" id="205">
+<td><a id="l205" class='ln'>205</a></td><td>  <span class="kw">for</span> (<a id="205c8" class="tk">c_index</a> = 0; <a id="205c21" class="tk">c_index</a> <a id="205c29" class="tk">&lt;</a> 3; <a id="205c34" class="tk">c_index</a><a id="205c41" class="tk">++</a>) <span class="br">{</span></td></tr>
+<tr name="206" id="206">
+<td><a id="l206" class='ln'>206</a></td><td>    <a id="206c5" class="tk">csum</a> <a id="206c10" class="tk">+=</a> <a id="206c13" class="tk">estimate_lane_center_B</a>.<a id="206c36" class="tk">EstimateLaneCenter</a>.<a id="206c55" class="tk">Sum</a>[<a id="206c59" class="tk">c_index</a>];</td></tr>
+<tr name="207" id="207">
+<td><a id="l207" class='ln'>207</a></td><td>    <a id="207c5" class="tk">csumrev</a>[(<a id="207c14" class="tk">int32_T</a>)<a id="207c22" class="tk">cumRevIndex</a> <a id="207c34" class="tk">-</a> 1] =</td></tr>
+<tr name="208" id="208">
+<td><a id="l208" class='ln'>208</a></td><td>      <a id="208c7" class="tk">estimate_lane_center_B</a>.<a id="208c30" class="tk">EstimateLaneCenter</a>.<a id="208c49" class="tk">Sum</a>[<a id="208c53" class="tk">c_index</a>];</td></tr>
+<tr name="209" id="209">
+<td><a id="l209" class='ln'>209</a></td><td>    <span class="kw">if</span> (<a id="209c9" class="tk">cumRevIndex</a> <a id="209c21" class="tk">!=</a> 3.0) <span class="br">{</span></td></tr>
+<tr name="210" id="210">
+<td><a id="l210" class='ln'>210</a></td><td>      <a id="210c7" class="tk">cumRevIndex</a><a id="210c18" class="tk">++</a>;</td></tr>
+<tr name="211" id="211">
+<td><a id="l211" class='ln'>211</a></td><td>    <span class="br">}</span> <span class="kw">else</span> <span class="br">{</span></td></tr>
+<tr name="212" id="212">
+<td><a id="l212" class='ln'>212</a></td><td>      <a id="212c7" class="tk">cumRevIndex</a> = 1.0;</td></tr>
+<tr name="213" id="213">
+<td><a id="l213" class='ln'>213</a></td><td>      <a id="213c7" class="tk">csum</a> = 0.0;</td></tr>
+<tr name="214" id="214">
+<td><a id="l214" class='ln'>214</a></td><td>      <a id="214c7" class="tk">csumrev</a>[1] <a id="214c18" class="tk">+=</a> <a id="214c21" class="tk">csumrev</a>[2];</td></tr>
+<tr name="215" id="215">
+<td><a id="l215" class='ln'>215</a></td><td>      <a id="215c7" class="tk">csumrev</a>[0] <a id="215c18" class="tk">+=</a> <a id="215c21" class="tk">csumrev</a>[1];</td></tr>
+<tr name="216" id="216">
+<td><a id="l216" class='ln'>216</a></td><td>    <span class="br">}</span></td></tr>
+<tr name="217" id="217">
+<td><a id="l217" class='ln'>217</a></td><td>  <span class="br">}</span></td></tr>
+<tr name="218" id="218">
+<td><a id="l218" class='ln'>218</a></td><td></td></tr>
+<tr name="219" id="219">
+<td><a id="l219" class='ln'>219</a></td><td>  <a id="219c3" class="tk">estimate_lane_center_DW</a>.<a id="219c27" class="tk">obj</a>.<a id="219c31" class="tk">pStatistic</a>-&gt;<a id="219c43" class="tk">pCumSum</a> = <a id="219c53" class="tk">csum</a>;</td></tr>
+<tr name="220" id="220">
+<td><a id="l220" class='ln'>220</a></td><td>  <a id="220c3" class="tk">estimate_lane_center_DW</a>.<a id="220c27" class="tk">obj</a>.<a id="220c31" class="tk">pStatistic</a>-&gt;<a id="220c43" class="tk">pCumSumRev</a>[0] = <a id="220c59" class="tk">csumrev</a>[0];</td></tr>
+<tr name="221" id="221">
+<td><a id="l221" class='ln'>221</a></td><td>  <a id="221c3" class="tk">estimate_lane_center_DW</a>.<a id="221c27" class="tk">obj</a>.<a id="221c31" class="tk">pStatistic</a>-&gt;<a id="221c43" class="tk">pCumSumRev</a>[1] = <a id="221c59" class="tk">csumrev</a>[1];</td></tr>
+<tr name="222" id="222">
+<td><a id="l222" class='ln'>222</a></td><td>  <a id="222c3" class="tk">estimate_lane_center_DW</a>.<a id="222c27" class="tk">obj</a>.<a id="222c31" class="tk">pStatistic</a>-&gt;<a id="222c43" class="tk">pCumSumRev</a>[2] = <a id="222c59" class="tk">csumrev</a>[2];</td></tr>
+<tr name="223" id="223">
+<td><a id="l223" class='ln'>223</a></td><td>  <a id="223c3" class="tk">estimate_lane_center_DW</a>.<a id="223c27" class="tk">obj</a>.<a id="223c31" class="tk">pStatistic</a>-&gt;<a id="223c43" class="tk">pCumRevIndex</a> = <a id="223c58" class="tk">cumRevIndex</a>;</td></tr>
+<tr name="224" id="224">
+<td><a id="l224" class='ln'>224</a></td><td></td></tr>
+<tr name="225" id="225">
+<td><a id="l225" class='ln'>225</a></td><td>  <span class="ct">/* End of MATLABSystem: '&lt;S2&gt;/Moving Average' */</span></td></tr>
+<tr name="226" id="226">
+<td><a id="l226" class='ln'>226</a></td><td><span class="br">}</span></td></tr>
+<tr name="227" id="227">
+<td><a id="l227" class='ln'>227</a></td><td></td></tr>
+<tr name="228" id="228">
+<td><a id="l228" class='ln'>228</a></td><td><span class="ct">/* Model update function */</span></td></tr>
+<tr name="229" id="229">
+<td><a id="l229" class='ln'>229</a></td><td><span class="kw">void</span> <a id="229c6" class="tk">estimate_lane_center_update</a>(<span class="kw">void</span>)</td></tr>
+<tr name="230" id="230">
+<td><a id="l230" class='ln'>230</a></td><td><span class="br">{</span></td></tr>
+<tr name="231" id="231">
+<td><a id="l231" class='ln'>231</a></td><td>  <span class="ct">/* Update for Atomic SubSystem: '&lt;S2&gt;/Estimate Lane Center' */</span></td></tr>
+<tr name="232" id="232">
+<td><a id="l232" class='ln'>232</a></td><td>  <a id="232c3" class="tk">estimate_lane_center_EstimateLaneCenter_Update</a></td></tr>
+<tr name="233" id="233">
+<td><a id="l233" class='ln'>233</a></td><td>    (<a id="233c6" class="tk">&amp;</a><a id="233c7" class="tk">estimate_lane_center_B</a>.<a id="233c30" class="tk">EstimateLaneCenter</a>,</td></tr>
+<tr name="234" id="234">
+<td><a id="l234" class='ln'>234</a></td><td>     <a id="234c6" class="tk">&amp;</a><a id="234c7" class="tk">estimate_lane_center_DW</a>.<a id="234c31" class="tk">EstimateLaneCenter</a>);</td></tr>
+<tr name="235" id="235">
+<td><a id="l235" class='ln'>235</a></td><td></td></tr>
+<tr name="236" id="236">
+<td><a id="l236" class='ln'>236</a></td><td>  <span class="ct">/* End of Update for SubSystem: '&lt;S2&gt;/Estimate Lane Center' */</span></td></tr>
+<tr name="237" id="237">
+<td><a id="l237" class='ln'>237</a></td><td><span class="br">}</span></td></tr>
+<tr name="238" id="238">
+<td><a id="l238" class='ln'>238</a></td><td></td></tr>
+<tr name="239" id="239">
+<td><a id="l239" class='ln'>239</a></td><td><span class="ct">/* Model initialize function */</span></td></tr>
+<tr name="240" id="240">
+<td><a id="l240" class='ln'>240</a></td><td><span class="kw">void</span> <a id="240c6" class="tk">estimate_lane_center_initialize</a>(<span class="kw">void</span>)</td></tr>
+<tr name="241" id="241">
+<td><a id="l241" class='ln'>241</a></td><td><span class="br">{</span></td></tr>
+<tr name="242" id="242">
+<td><a id="l242" class='ln'>242</a></td><td>  <span class="ct">/* Registration code */</span></td></tr>
+<tr name="243" id="243">
+<td><a id="l243" class='ln'>243</a></td><td></td></tr>
+<tr name="244" id="244">
+<td><a id="l244" class='ln'>244</a></td><td>  <span class="ct">/* initialize error status */</span></td></tr>
+<tr name="245" id="245">
+<td><a id="l245" class='ln'>245</a></td><td>  <a id="245c3" class="tk">rtmSetErrorStatus</a>(<a id="245c21" class="tk">estimate_lane_center_M</a>, (<a id="245c46" class="tk">NULL</a>));</td></tr>
+<tr name="246" id="246">
+<td><a id="l246" class='ln'>246</a></td><td></td></tr>
+<tr name="247" id="247">
+<td><a id="l247" class='ln'>247</a></td><td>  <span class="ct">/* block I/O */</span></td></tr>
+<tr name="248" id="248">
+<td><a id="l248" class='ln'>248</a></td><td>  (<span class="kw">void</span>) <a id="248c10" class="tk">memset</a>(((<span class="kw">void</span> <a id="248c24" class="tk">*</a>) <a id="248c27" class="tk">&amp;</a><a id="248c28" class="tk">estimate_lane_center_B</a>), 0,</td></tr>
+<tr name="249" id="249">
+<td><a id="l249" class='ln'>249</a></td><td>                <span class="kw">sizeof</span>(<a id="249c24" class="tk">B_estimate_lane_center_T</a>));</td></tr>
+<tr name="250" id="250">
+<td><a id="l250" class='ln'>250</a></td><td></td></tr>
+<tr name="251" id="251">
+<td><a id="l251" class='ln'>251</a></td><td>  <span class="ct">/* states (dwork) */</span></td></tr>
+<tr name="252" id="252">
+<td><a id="l252" class='ln'>252</a></td><td>  (<span class="kw">void</span>) <a id="252c10" class="tk">memset</a>((<span class="kw">void</span> <a id="252c23" class="tk">*</a>)<a id="252c25" class="tk">&amp;</a><a id="252c26" class="tk">estimate_lane_center_DW</a>, 0,</td></tr>
+<tr name="253" id="253">
+<td><a id="l253" class='ln'>253</a></td><td>                <span class="kw">sizeof</span>(<a id="253c24" class="tk">DW_estimate_lane_center_T</a>));</td></tr>
+<tr name="254" id="254">
+<td><a id="l254" class='ln'>254</a></td><td></td></tr>
+<tr name="255" id="255">
+<td><a id="l255" class='ln'>255</a></td><td>  <span class="br">{</span></td></tr>
+<tr name="256" id="256">
+<td><a id="l256" class='ln'>256</a></td><td>    <a id="256c5" class="tk">char_T</a> <a id="256c12" class="tk">tmp</a>[17];</td></tr>
+<tr name="257" id="257">
+<td><a id="l257" class='ln'>257</a></td><td>    <a id="257c5" class="tk">int32_T</a> <a id="257c13" class="tk">i</a>;</td></tr>
+<tr name="258" id="258">
+<td><a id="l258" class='ln'>258</a></td><td>    <span class="kw">static</span> <span class="kw">const</span> <a id="258c18" class="tk">char_T</a> <a id="258c25" class="tk">tmp_0</a>[16] = <span class="br">{</span> '/', 't', 'r', 'e', 'x', '2', '/', 'l',</td></tr>
+<tr name="259" id="259">
+<td><a id="l259" class='ln'>259</a></td><td>      'e', 'f', 't', '_', 'l', 'a', 'n', 'e' <span class="br">}</span>;</td></tr>
+<tr name="260" id="260">
+<td><a id="l260" class='ln'>260</a></td><td></td></tr>
+<tr name="261" id="261">
+<td><a id="l261" class='ln'>261</a></td><td>    <span class="ct">/* Start for Atomic SubSystem: '&lt;S2&gt;/Subscribe' */</span></td></tr>
+<tr name="262" id="262">
+<td><a id="l262" class='ln'>262</a></td><td>    <span class="ct">/* Start for MATLABSystem: '&lt;S5&gt;/SourceBlock' */</span></td></tr>
+<tr name="263" id="263">
+<td><a id="l263" class='ln'>263</a></td><td>    <a id="263c5" class="tk">estimate_lane_center_DW</a>.<a id="263c29" class="tk">obj_k</a>.<a id="263c35" class="tk">matlabCodegenIsDeleted</a> = false;</td></tr>
+<tr name="264" id="264">
+<td><a id="l264" class='ln'>264</a></td><td>    <a id="264c5" class="tk">estimate_lane_center_DW</a>.<a id="264c29" class="tk">objisempty_j</a> = true;</td></tr>
+<tr name="265" id="265">
+<td><a id="l265" class='ln'>265</a></td><td>    <a id="265c5" class="tk">estimate_lane_center_DW</a>.<a id="265c29" class="tk">obj_k</a>.<a id="265c35" class="tk">isInitialized</a> = 1;</td></tr>
+<tr name="266" id="266">
+<td><a id="l266" class='ln'>266</a></td><td>    <span class="kw">for</span> (<a id="266c10" class="tk">i</a> = 0; <a id="266c17" class="tk">i</a> <a id="266c19" class="tk">&lt;</a> 16; <a id="266c25" class="tk">i</a><a id="266c26" class="tk">++</a>) <span class="br">{</span></td></tr>
+<tr name="267" id="267">
+<td><a id="l267" class='ln'>267</a></td><td>      <a id="267c7" class="tk">tmp</a>[<a id="267c11" class="tk">i</a>] = <a id="267c16" class="tk">tmp_0</a>[<a id="267c22" class="tk">i</a>];</td></tr>
+<tr name="268" id="268">
+<td><a id="l268" class='ln'>268</a></td><td>    <span class="br">}</span></td></tr>
+<tr name="269" id="269">
+<td><a id="l269" class='ln'>269</a></td><td></td></tr>
+<tr name="270" id="270">
+<td><a id="l270" class='ln'>270</a></td><td>    <a id="270c5" class="tk">tmp</a>[16] = '\x00';</td></tr>
+<tr name="271" id="271">
+<td><a id="l271" class='ln'>271</a></td><td>    <a id="271c5" class="tk">Sub_estimate_lane_center_1131</a>.<a id="271c35" class="tk">createSubscriber</a>(<a id="271c52" class="tk">tmp</a>, 1);</td></tr>
+<tr name="272" id="272">
+<td><a id="l272" class='ln'>272</a></td><td>    <a id="272c5" class="tk">estimate_lane_center_DW</a>.<a id="272c29" class="tk">obj_k</a>.<a id="272c35" class="tk">isSetupComplete</a> = true;</td></tr>
+<tr name="273" id="273">
+<td><a id="l273" class='ln'>273</a></td><td></td></tr>
+<tr name="274" id="274">
+<td><a id="l274" class='ln'>274</a></td><td>    <span class="ct">/* End of Start for MATLABSystem: '&lt;S5&gt;/SourceBlock' */</span></td></tr>
+<tr name="275" id="275">
+<td><a id="l275" class='ln'>275</a></td><td>    <span class="ct">/* End of Start for SubSystem: '&lt;S2&gt;/Subscribe' */</span></td></tr>
+<tr name="276" id="276">
+<td><a id="l276" class='ln'>276</a></td><td></td></tr>
+<tr name="277" id="277">
+<td><a id="l277" class='ln'>277</a></td><td>    <span class="ct">/* Start for Atomic SubSystem: '&lt;S2&gt;/Subscribe1' */</span></td></tr>
+<tr name="278" id="278">
+<td><a id="l278" class='ln'>278</a></td><td>    <span class="ct">/* Start for MATLABSystem: '&lt;S6&gt;/SourceBlock' */</span></td></tr>
+<tr name="279" id="279">
+<td><a id="l279" class='ln'>279</a></td><td>    <a id="279c5" class="tk">estimate_lane_center_DW</a>.<a id="279c29" class="tk">obj_h</a>.<a id="279c35" class="tk">matlabCodegenIsDeleted</a> = false;</td></tr>
+<tr name="280" id="280">
+<td><a id="l280" class='ln'>280</a></td><td>    <a id="280c5" class="tk">estimate_lane_center_DW</a>.<a id="280c29" class="tk">objisempty</a> = true;</td></tr>
+<tr name="281" id="281">
+<td><a id="l281" class='ln'>281</a></td><td>    <a id="281c5" class="tk">estimate_lane_center_DW</a>.<a id="281c29" class="tk">obj_h</a>.<a id="281c35" class="tk">isInitialized</a> = 1;</td></tr>
+<tr name="282" id="282">
+<td><a id="l282" class='ln'>282</a></td><td>    <span class="kw">for</span> (<a id="282c10" class="tk">i</a> = 0; <a id="282c17" class="tk">i</a> <a id="282c19" class="tk">&lt;</a> 16; <a id="282c25" class="tk">i</a><a id="282c26" class="tk">++</a>) <span class="br">{</span></td></tr>
+<tr name="283" id="283">
+<td><a id="l283" class='ln'>283</a></td><td>      <a id="283c7" class="tk">tmp</a>[<a id="283c11" class="tk">i</a>] = <a id="283c16" class="tk">tmp_0</a>[<a id="283c22" class="tk">i</a>];</td></tr>
+<tr name="284" id="284">
+<td><a id="l284" class='ln'>284</a></td><td>    <span class="br">}</span></td></tr>
+<tr name="285" id="285">
+<td><a id="l285" class='ln'>285</a></td><td></td></tr>
+<tr name="286" id="286">
+<td><a id="l286" class='ln'>286</a></td><td>    <a id="286c5" class="tk">tmp</a>[16] = '\x00';</td></tr>
+<tr name="287" id="287">
+<td><a id="l287" class='ln'>287</a></td><td>    <a id="287c5" class="tk">Sub_estimate_lane_center_1134</a>.<a id="287c35" class="tk">createSubscriber</a>(<a id="287c52" class="tk">tmp</a>, 1);</td></tr>
+<tr name="288" id="288">
+<td><a id="l288" class='ln'>288</a></td><td>    <a id="288c5" class="tk">estimate_lane_center_DW</a>.<a id="288c29" class="tk">obj_h</a>.<a id="288c35" class="tk">isSetupComplete</a> = true;</td></tr>
+<tr name="289" id="289">
+<td><a id="l289" class='ln'>289</a></td><td></td></tr>
+<tr name="290" id="290">
+<td><a id="l290" class='ln'>290</a></td><td>    <span class="ct">/* End of Start for MATLABSystem: '&lt;S6&gt;/SourceBlock' */</span></td></tr>
+<tr name="291" id="291">
+<td><a id="l291" class='ln'>291</a></td><td>    <span class="ct">/* End of Start for SubSystem: '&lt;S2&gt;/Subscribe1' */</span></td></tr>
+<tr name="292" id="292">
+<td><a id="l292" class='ln'>292</a></td><td></td></tr>
+<tr name="293" id="293">
+<td><a id="l293" class='ln'>293</a></td><td>    <span class="ct">/* Start for MATLABSystem: '&lt;S2&gt;/Moving Average' */</span></td></tr>
+<tr name="294" id="294">
+<td><a id="l294" class='ln'>294</a></td><td>    <a id="294c5" class="tk">estimate_lane_center_DW</a>.<a id="294c29" class="tk">obj</a>.<a id="294c33" class="tk">matlabCodegenIsDeleted</a> = false;</td></tr>
+<tr name="295" id="295">
+<td><a id="l295" class='ln'>295</a></td><td>    <a id="295c5" class="tk">estimate_lane_center_DW</a>.<a id="295c29" class="tk">objisempty_d</a> = true;</td></tr>
+<tr name="296" id="296">
+<td><a id="l296" class='ln'>296</a></td><td>    <a id="296c5" class="tk">estimate_lane_center_DW</a>.<a id="296c29" class="tk">obj</a>.<a id="296c33" class="tk">isInitialized</a> = 1;</td></tr>
+<tr name="297" id="297">
+<td><a id="l297" class='ln'>297</a></td><td>    <a id="297c5" class="tk">estimate_lane_center_DW</a>.<a id="297c29" class="tk">obj</a>.<a id="297c33" class="tk">NumChannels</a> = 1;</td></tr>
+<tr name="298" id="298">
+<td><a id="l298" class='ln'>298</a></td><td>    <a id="298c5" class="tk">estimate_lane_center_DW</a>.<a id="298c29" class="tk">gobj_0</a>.<a id="298c36" class="tk">isInitialized</a> = 0;</td></tr>
+<tr name="299" id="299">
+<td><a id="l299" class='ln'>299</a></td><td>    <a id="299c5" class="tk">estimate_lane_center_DW</a>.<a id="299c29" class="tk">obj</a>.<a id="299c33" class="tk">pStatistic</a> = <a id="299c46" class="tk">&amp;</a><a id="299c47" class="tk">estimate_lane_center_DW</a>.<a id="299c71" class="tk">gobj_0</a>;</td></tr>
+<tr name="300" id="300">
+<td><a id="l300" class='ln'>300</a></td><td>    <a id="300c5" class="tk">estimate_lane_center_DW</a>.<a id="300c29" class="tk">obj</a>.<a id="300c33" class="tk">isSetupComplete</a> = true;</td></tr>
+<tr name="301" id="301">
+<td><a id="l301" class='ln'>301</a></td><td>    <a id="301c5" class="tk">estimate_lane_center_DW</a>.<a id="301c29" class="tk">obj</a>.<a id="301c33" class="tk">TunablePropsChanged</a> = false;</td></tr>
+<tr name="302" id="302">
+<td><a id="l302" class='ln'>302</a></td><td>  <span class="br">}</span></td></tr>
+<tr name="303" id="303">
+<td><a id="l303" class='ln'>303</a></td><td></td></tr>
+<tr name="304" id="304">
+<td><a id="l304" class='ln'>304</a></td><td>  <span class="ct">/* SystemInitialize for Atomic SubSystem: '&lt;S2&gt;/Subscribe' */</span></td></tr>
+<tr name="305" id="305">
+<td><a id="l305" class='ln'>305</a></td><td>  <span class="ct">/* SystemInitialize for Enabled SubSystem: '&lt;S5&gt;/Enabled Subsystem' */</span></td></tr>
+<tr name="306" id="306">
+<td><a id="l306" class='ln'>306</a></td><td>  <a id="306c3" class="tk">estimate_lane_center_EnabledSubsystem_Init</a></td></tr>
+<tr name="307" id="307">
+<td><a id="l307" class='ln'>307</a></td><td>    (<a id="307c6" class="tk">&amp;</a><a id="307c7" class="tk">estimate_lane_center_B</a>.<a id="307c30" class="tk">EnabledSubsystem</a>);</td></tr>
+<tr name="308" id="308">
+<td><a id="l308" class='ln'>308</a></td><td></td></tr>
+<tr name="309" id="309">
+<td><a id="l309" class='ln'>309</a></td><td>  <span class="ct">/* End of SystemInitialize for SubSystem: '&lt;S5&gt;/Enabled Subsystem' */</span></td></tr>
+<tr name="310" id="310">
+<td><a id="l310" class='ln'>310</a></td><td>  <span class="ct">/* End of SystemInitialize for SubSystem: '&lt;S2&gt;/Subscribe' */</span></td></tr>
+<tr name="311" id="311">
+<td><a id="l311" class='ln'>311</a></td><td></td></tr>
+<tr name="312" id="312">
+<td><a id="l312" class='ln'>312</a></td><td>  <span class="ct">/* SystemInitialize for Atomic SubSystem: '&lt;S2&gt;/Subscribe1' */</span></td></tr>
+<tr name="313" id="313">
+<td><a id="l313" class='ln'>313</a></td><td>  <span class="ct">/* SystemInitialize for Enabled SubSystem: '&lt;S6&gt;/Enabled Subsystem' */</span></td></tr>
+<tr name="314" id="314">
+<td><a id="l314" class='ln'>314</a></td><td>  <a id="314c3" class="tk">estimate_lane_center_EnabledSubsystem_Init</a></td></tr>
+<tr name="315" id="315">
+<td><a id="l315" class='ln'>315</a></td><td>    (<a id="315c6" class="tk">&amp;</a><a id="315c7" class="tk">estimate_lane_center_B</a>.<a id="315c30" class="tk">EnabledSubsystem_l</a>);</td></tr>
+<tr name="316" id="316">
+<td><a id="l316" class='ln'>316</a></td><td></td></tr>
+<tr name="317" id="317">
+<td><a id="l317" class='ln'>317</a></td><td>  <span class="ct">/* End of SystemInitialize for SubSystem: '&lt;S6&gt;/Enabled Subsystem' */</span></td></tr>
+<tr name="318" id="318">
+<td><a id="l318" class='ln'>318</a></td><td>  <span class="ct">/* End of SystemInitialize for SubSystem: '&lt;S2&gt;/Subscribe1' */</span></td></tr>
+<tr name="319" id="319">
+<td><a id="l319" class='ln'>319</a></td><td></td></tr>
+<tr name="320" id="320">
+<td><a id="l320" class='ln'>320</a></td><td>  <span class="ct">/* SystemInitialize for Atomic SubSystem: '&lt;S2&gt;/Estimate Lane Center' */</span></td></tr>
+<tr name="321" id="321">
+<td><a id="l321" class='ln'>321</a></td><td>  <a id="321c3" class="tk">estimate_lane_center_EstimateLaneCenter_Init</a></td></tr>
+<tr name="322" id="322">
+<td><a id="l322" class='ln'>322</a></td><td>    (<a id="322c6" class="tk">&amp;</a><a id="322c7" class="tk">estimate_lane_center_B</a>.<a id="322c30" class="tk">EstimateLaneCenter</a>,</td></tr>
+<tr name="323" id="323">
+<td><a id="l323" class='ln'>323</a></td><td>     <a id="323c6" class="tk">&amp;</a><a id="323c7" class="tk">estimate_lane_center_DW</a>.<a id="323c31" class="tk">EstimateLaneCenter</a>);</td></tr>
+<tr name="324" id="324">
+<td><a id="l324" class='ln'>324</a></td><td></td></tr>
+<tr name="325" id="325">
+<td><a id="l325" class='ln'>325</a></td><td>  <span class="ct">/* End of SystemInitialize for SubSystem: '&lt;S2&gt;/Estimate Lane Center' */</span></td></tr>
+<tr name="326" id="326">
+<td><a id="l326" class='ln'>326</a></td><td></td></tr>
+<tr name="327" id="327">
+<td><a id="l327" class='ln'>327</a></td><td>  <span class="ct">/* InitializeConditions for MATLABSystem: '&lt;S2&gt;/Moving Average' */</span></td></tr>
+<tr name="328" id="328">
+<td><a id="l328" class='ln'>328</a></td><td>  <span class="kw">if</span> (<a id="328c7" class="tk">estimate_lane_center_DW</a>.<a id="328c31" class="tk">obj</a>.<a id="328c35" class="tk">pStatistic</a>-&gt;<a id="328c47" class="tk">isInitialized</a> <a id="328c61" class="tk">==</a> 1) <span class="br">{</span></td></tr>
+<tr name="329" id="329">
+<td><a id="l329" class='ln'>329</a></td><td>    <a id="329c5" class="tk">estimate_lane_center_DW</a>.<a id="329c29" class="tk">obj</a>.<a id="329c33" class="tk">pStatistic</a>-&gt;<a id="329c45" class="tk">pCumSum</a> = 0.0;</td></tr>
+<tr name="330" id="330">
+<td><a id="l330" class='ln'>330</a></td><td>    <a id="330c5" class="tk">estimate_lane_center_DW</a>.<a id="330c29" class="tk">obj</a>.<a id="330c33" class="tk">pStatistic</a>-&gt;<a id="330c45" class="tk">pCumSumRev</a>[0] = 0.0;</td></tr>
+<tr name="331" id="331">
+<td><a id="l331" class='ln'>331</a></td><td>    <a id="331c5" class="tk">estimate_lane_center_DW</a>.<a id="331c29" class="tk">obj</a>.<a id="331c33" class="tk">pStatistic</a>-&gt;<a id="331c45" class="tk">pCumSumRev</a>[1] = 0.0;</td></tr>
+<tr name="332" id="332">
+<td><a id="l332" class='ln'>332</a></td><td>    <a id="332c5" class="tk">estimate_lane_center_DW</a>.<a id="332c29" class="tk">obj</a>.<a id="332c33" class="tk">pStatistic</a>-&gt;<a id="332c45" class="tk">pCumSumRev</a>[2] = 0.0;</td></tr>
+<tr name="333" id="333">
+<td><a id="l333" class='ln'>333</a></td><td>    <a id="333c5" class="tk">estimate_lane_center_DW</a>.<a id="333c29" class="tk">obj</a>.<a id="333c33" class="tk">pStatistic</a>-&gt;<a id="333c45" class="tk">pCumRevIndex</a> = 1.0;</td></tr>
+<tr name="334" id="334">
+<td><a id="l334" class='ln'>334</a></td><td>  <span class="br">}</span></td></tr>
+<tr name="335" id="335">
+<td><a id="l335" class='ln'>335</a></td><td></td></tr>
+<tr name="336" id="336">
+<td><a id="l336" class='ln'>336</a></td><td>  <span class="ct">/* End of InitializeConditions for MATLABSystem: '&lt;S2&gt;/Moving Average' */</span></td></tr>
+<tr name="337" id="337">
+<td><a id="l337" class='ln'>337</a></td><td><span class="br">}</span></td></tr>
+<tr name="338" id="338">
+<td><a id="l338" class='ln'>338</a></td><td></td></tr>
+<tr name="339" id="339">
+<td><a id="l339" class='ln'>339</a></td><td><span class="ct">/* Model terminate function */</span></td></tr>
+<tr name="340" id="340">
+<td><a id="l340" class='ln'>340</a></td><td><span class="kw">void</span> <a id="340c6" class="tk">estimate_lane_center_terminate</a>(<span class="kw">void</span>)</td></tr>
+<tr name="341" id="341">
+<td><a id="l341" class='ln'>341</a></td><td><span class="br">{</span></td></tr>
+<tr name="342" id="342">
+<td><a id="l342" class='ln'>342</a></td><td>  <span class="ct">/* Terminate for Atomic SubSystem: '&lt;S2&gt;/Subscribe' */</span></td></tr>
+<tr name="343" id="343">
+<td><a id="l343" class='ln'>343</a></td><td>  <span class="ct">/* Terminate for MATLABSystem: '&lt;S5&gt;/SourceBlock' */</span></td></tr>
+<tr name="344" id="344">
+<td><a id="l344" class='ln'>344</a></td><td>  <a id="344c3" class="tk">estimate_lane_center_matlabCodegenHandle_matlabCodegenDestructor_k</a></td></tr>
+<tr name="345" id="345">
+<td><a id="l345" class='ln'>345</a></td><td>    (<a id="345c6" class="tk">&amp;</a><a id="345c7" class="tk">estimate_lane_center_DW</a>.<a id="345c31" class="tk">obj_k</a>);</td></tr>
+<tr name="346" id="346">
+<td><a id="l346" class='ln'>346</a></td><td></td></tr>
+<tr name="347" id="347">
+<td><a id="l347" class='ln'>347</a></td><td>  <span class="ct">/* End of Terminate for SubSystem: '&lt;S2&gt;/Subscribe' */</span></td></tr>
+<tr name="348" id="348">
+<td><a id="l348" class='ln'>348</a></td><td></td></tr>
+<tr name="349" id="349">
+<td><a id="l349" class='ln'>349</a></td><td>  <span class="ct">/* Terminate for Atomic SubSystem: '&lt;S2&gt;/Subscribe1' */</span></td></tr>
+<tr name="350" id="350">
+<td><a id="l350" class='ln'>350</a></td><td>  <span class="ct">/* Terminate for MATLABSystem: '&lt;S6&gt;/SourceBlock' */</span></td></tr>
+<tr name="351" id="351">
+<td><a id="l351" class='ln'>351</a></td><td>  <a id="351c3" class="tk">estimate_lane_center_matlabCodegenHandle_matlabCodegenDestructor_k</a></td></tr>
+<tr name="352" id="352">
+<td><a id="l352" class='ln'>352</a></td><td>    (<a id="352c6" class="tk">&amp;</a><a id="352c7" class="tk">estimate_lane_center_DW</a>.<a id="352c31" class="tk">obj_h</a>);</td></tr>
+<tr name="353" id="353">
+<td><a id="l353" class='ln'>353</a></td><td></td></tr>
+<tr name="354" id="354">
+<td><a id="l354" class='ln'>354</a></td><td>  <span class="ct">/* End of Terminate for SubSystem: '&lt;S2&gt;/Subscribe1' */</span></td></tr>
+<tr name="355" id="355">
+<td><a id="l355" class='ln'>355</a></td><td></td></tr>
+<tr name="356" id="356">
+<td><a id="l356" class='ln'>356</a></td><td>  <span class="ct">/* Terminate for MATLABSystem: '&lt;S2&gt;/Moving Average' */</span></td></tr>
+<tr name="357" id="357">
+<td><a id="l357" class='ln'>357</a></td><td>  <a id="357c3" class="tk">estimate_lane_center_matlabCodegenHandle_matlabCodegenDestructor</a></td></tr>
+<tr name="358" id="358">
+<td><a id="l358" class='ln'>358</a></td><td>    (<a id="358c6" class="tk">&amp;</a><a id="358c7" class="tk">estimate_lane_center_DW</a>.<a id="358c31" class="tk">obj</a>);</td></tr>
+<tr name="359" id="359">
+<td><a id="l359" class='ln'>359</a></td><td><span class="br">}</span></td></tr>
+<tr name="360" id="360">
+<td><a id="l360" class='ln'>360</a></td><td></td></tr>
+</table>
+</pre>
+</body>
+</html>

@@ -1,0 +1,40 @@
+close all
+clear
+clc
+
+veh_id = 'trex2';
+
+%%
+
+
+
+%% Initialize Ros
+
+
+right_lane_topic = ['/',veh_id, '/right_lane'];
+right_lane_pub = rospublisher(right_lane_topic,'path_follower/lane');
+right_lane_msg = rosmessage(right_lane_pub);
+
+
+%% Run center lane compute
+
+sim('estimate_lane_center.slx')
+centerEgoBoundary.Parameters(1) = mean(center_curvature_derivative.Data);
+centerEgoBoundary.Parameters(2) = mean(center_curvature.Data(1,:));
+centerEgoBoundary.Parameters(3) = mean(center_relative_yaw_angle.Data);
+centerEgoBoundary.Parameters(4) = mean(center_lateral_deviation.Data);
+[birdsEyeWithEgoLane,frameWithEgoLane] = showLanes(birdsEyeImage,leftEgoBoundary,centerEgoBoundary,rightEgoBoundary,birdsEyeConfig,bottomOffset,distAheadOfSensor,frame,sensor);
+
+%% Publish Center Lane Params
+
+right_lane_msg.Strength = right_strength;
+right_lane_msg.RhoDot = centerEgoBoundary.Parameters(1);
+right_lane_msg.Rho = centerEgoBoundary.Parameters(2);
+right_lane_msg.Phi = centerEgoBoundary.Parameters(3);
+right_lane_msg.Y = centerEgoBoundary.Parameters(4);
+send(right_lane_pub, right_lane_msg)
+
+subplot('Position', [0, 0, 0.5, 1.0]) % [left, bottom, width, height] in normalized units
+imshow(birdsEyeWithEgoLane)
+subplot('Position', [0.5, 0, 0.5, 1.0])
+imshow(frameWithEgoLane)

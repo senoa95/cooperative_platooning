@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Export-Package: novatel_gps_msgs;version="0.0.0";uses:="org.jboss.nett
+ y.buffer,org.ros.internal.message,std_msgs"
+Bundle-SymbolicName: org.ros.rosjava_messages.novatel_gps_msgs
+Bundle-Version: 0.0.0
+Bundle-Name: novatel_gps_msgs
+Bundle-ManifestVersion: 2
+Bnd-LastModified: 1594165024000
+Import-Package: org.jboss.netty.buffer;version="[3.5,4)",org.ros.inter
+ nal.message,std_msgs;version="[0.5,1)"
+Created-By: 1.8.0_222 (AdoptOpenJDK)
+Tool: Bnd-2.1.0.20130426-122213
+

@@ -1,5 +1,6 @@
 <launch>
   <node name="path_finder" pkg="path_follower" type="new_ppcontroller.py">
+  <remap from="laneParams" to="/trex2/center_lane"/>
       <!-- <rosparam command="load" file="lane_keeping.yaml" /> -->
   </node>
 </launch>
