@@ -5,3 +5,4 @@ devel/*
 *.slxc
 *.m~
 */slprj
+src/matlab_gen/*
