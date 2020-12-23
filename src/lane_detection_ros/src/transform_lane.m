@@ -7,7 +7,7 @@ follow_veh_id = 'trex';
 
 i = 1;
 maxDistToAugment = 2;
-
+plotPose = false;
 %% Initialize Lane Center Detector Values
 Ts = 0.1;
 PredictionHorizon = 2;
@@ -19,6 +19,10 @@ if ros.internal.Global.isNodeActive == 0
     rosinit
 end
 
+pause(0.5)
+
+rosout_sub = rossubscriber('rosout');
+
 lead_center_lane_topic = ['/',lead_veh_id, '/center_lane'];
 lead_center_lane_sub = rossubscriber(lead_center_lane_topic);
 
@@ -29,7 +33,7 @@ lead_fix_topic = ['/',lead_veh_id, '/fix'];
 lead_fix_sub = rossubscriber(lead_fix_topic, 'sensor_msgs/NavSatFix');
 
 follow_center_lane_topic = ['/',follow_veh_id, '/center_lane'];
-follow_center_lane_sub = rossubscriber(follow_center_lane_topic, 'lane_detection_ros/lane');
+follow_center_lane_sub = rossubscriber(follow_center_lane_topic, 'path_follower/lane');
 
 follow_inspva_topic = ['/',follow_veh_id, '/inspva'];
 follow_inspva_sub = rossubscriber(follow_inspva_topic, 'novatel_gps_msgs/Inspva');
@@ -39,20 +43,22 @@ follow_fix_sub = rossubscriber(follow_fix_topic, 'sensor_msgs/NavSatFix');
 
 follow_cam_topic = ['/', follow_veh_id, '_cam/image_raw/compressed'];
 follow_cam_sub = rossubscriber(follow_cam_topic, 'sensor_msgs/CompressedImage');
-first_run = true;
 init_lead_pos_lat = 0;
 
 follow_aug_lane_topic = ['/',follow_veh_id,'/aug_center_lane'];
-follow_aug_lane_pub = rospublisher(follow_aug_lane_topic, 'lane_detection_ros/lane');
+follow_aug_lane_pub = rospublisher(follow_aug_lane_topic, 'path_follower/lane');
 follow_aug_lane = rosmessage(follow_aug_lane_pub);
 
 follow_aug_lane_flag_topic = ['/',follow_veh_id,'/aug_center_lane/flag'];
-follow_aug_lane_flag_pub = rospublisher(follow_aug_lane_flag_topic, 'std_msgs/Bool');
+follow_aug_lane_flag_pub = rospublisher(follow_aug_lane_flag_topic, 'std_msgs/Float32');
 follow_aug_lane_flag = rosmessage(follow_aug_lane_flag_pub);
 
 %% Run center lane compute
 while true
     %% parse ros messages
+    
+    % time
+    rosout = rosout_sub.receive;
     
     % lead
     lead_center_lane_msg = lead_center_lane_sub.receive;
@@ -75,28 +81,20 @@ while true
     follow_lane_struct.yaw(i) = follow_inspva_msg.Azimuth;
     
     %% Create augmented modified follower lanes
-    [min_dist_to_lead, min_dist_index] = min(sqrt(([lead_lane_struct.pos.x] - [follow_lane_struct.pos(i).x]).^2 +...
+    [min_dist_to_lead(i), min_dist_index] = min(sqrt(([lead_lane_struct.pos.x] - [follow_lane_struct.pos(i).x]).^2 +...
         ([lead_lane_struct.pos.y] - [follow_lane_struct.pos(i).y]).^2))
     
-    if ~first_run && lead_fix_msg.Latitude == init_lead_pos_lat && i > 10
-        break
+    if plotPose
+        figure(1)
+        plot(lead_fix_msg.Longitude, lead_fix_msg.Latitude, 'Marker','o','MarkerFaceColor','red');
+        hold on
+        plot(follow_fix_msg.Longitude, follow_fix_msg.Latitude, 'Marker','o','MarkerFaceColor','green');
+        legend('Lead Vehicle', 'Follow Vehicle')
+        xlabel('Longitude')
+        ylabel('Latitude')
     end
     
-    if first_run
-        init_lead_pos_lat = lead_fix_msg.Latitude;
-        first_run = false;
-    end
-    
-    
-    figure(1)
-    leadPosPlot = plot(lead_fix_msg.Latitude, lead_fix_msg.Longitude, 'Marker','o','MarkerFaceColor','red');
-    hold on
-    followPosPlot = plot(follow_fix_msg.Latitude, follow_fix_msg.Longitude, 'Marker','o','MarkerFaceColor','green');
-    legend('Lead Vehicle', 'Follow Vehicle')
-    xlabel('Latitude')
-    ylabel('Longitude')
-    
-     if min_dist_to_lead <= maxDistToAugment
+     if min_dist_to_lead(i) <= maxDistToAugment
         num_long = 150;
         follow_lane_struct.augLane(i) = lead_lane_struct.lane(min_dist_index);
         follow_lane_struct.augLane(i).Y = follow_lane_struct.lane(min_dist_index).Y;
@@ -113,12 +111,18 @@ while true
         rotatedLane = rotateLane(tempLateral,longRange,deltaYaw);
         f = fit(longRange', rotatedLane.lateral', 'poly3');
         follow_lane_struct.augLane(i).Phi = f.p3;
-        follow_aug_lane_flag = true;
-        send(follow_aug_lane_pub, follow_lane_struct.augLane(i))
+        follow_aug_lane_flag.Data = 1;
+        aug_lane_flag(i) = 1;
      else
          follow_lane_struct.augLane(i) = follow_lane_struct.lane(min_dist_index);
-         follow_aug_lane_flag = false;
+         follow_aug_lane_flag.Data = 0;
+         aug_lane_flag(i) = 0;
      end
+     send(follow_aug_lane_pub, follow_lane_struct.augLane(i))
+     send(follow_aug_lane_flag_pub, follow_aug_lane_flag)
+     time(i) = rosout.Header.Stamp.seconds;
+     plot(time)
+     hold on
      
      
         
