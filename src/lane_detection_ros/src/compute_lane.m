@@ -1,14 +1,13 @@
-function lane = compute_lane(laneParameters,sampleIdx)
+function lane = compute_lane(laneParameters,currentRange, sampleIdx)
 curr_yawToLane = laneParameters.headingAngle(sampleIdx);
-curr_laneRange = laneParameters.range(sampleIdx);
 curr_laneCrvtr =  laneParameters.curvature(sampleIdx);
 curr_laneCrvtrChg = laneParameters.curvatureDerivative(sampleIdx);
 curr_distToLane = laneParameters.distance(sampleIdx);
 
-lane = get_clothoid_approx(curr_yawToLane,curr_laneRange, curr_laneCrvtr,curr_laneCrvtrChg,curr_distToLane);
+lane = get_clothoid_approx(curr_yawToLane,currentRange, curr_laneCrvtr,curr_laneCrvtrChg,curr_distToLane);
 
     function [lane_approx] = get_clothoid_approx(yawToLane, laneRange, laneCrvtr, laneCrvtrChg, distToLane, varargin)
-        horizonStep = 1; %step size for iterating through from the minimum range to the maximum range
+        horizonStep = 0.5; %step size for iterating through from the minimum range to the maximum range
         %     distanceTraveled
         
         if ~isnan(laneRange) || laneRange <= 125

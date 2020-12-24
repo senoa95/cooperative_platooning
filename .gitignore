@@ -6,3 +6,4 @@ devel/*
 *.m~
 */slprj
 src/matlab_gen/*
+src/**/slprj/*
