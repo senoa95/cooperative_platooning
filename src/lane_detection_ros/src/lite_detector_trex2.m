@@ -2,7 +2,7 @@ close all
 clear
 clc
 
-veh_id = 'trex';
+veh_id = 'trex2';
 %% initialize camara intrinsics
 % focalLength = cameraParams.FocalLength;
 % principalPoint = cameraParams.PrincipalPoint;

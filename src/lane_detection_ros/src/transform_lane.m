@@ -24,7 +24,7 @@ pause(0.5)
 rosout_sub = rossubscriber('rosout');
 
 lead_center_lane_topic = ['/',lead_veh_id, '/center_lane'];
-lead_center_lane_sub = rossubscriber(lead_center_lane_topic);
+lead_center_lane_sub = rossubscriber(lead_center_lane_topic, 'path_follower/lane');
 
 lead_inspva_topic = ['/',lead_veh_id, '/inspva'];
 lead_inspva_sub = rossubscriber(lead_inspva_topic,'novatel_gps_msgs/Inspva');
@@ -121,8 +121,6 @@ while true
      send(follow_aug_lane_pub, follow_lane_struct.augLane(i))
      send(follow_aug_lane_flag_pub, follow_aug_lane_flag)
      time(i) = rosout.Header.Stamp.seconds;
-     plot(time)
-     hold on
      
      
         

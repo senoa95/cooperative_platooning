@@ -25,8 +25,11 @@ rosout_sub = rossubscriber('rosout');
 cam_topic = ['/', veh_id, '_cam/image_raw/compressed'];
 cam_sub = rossubscriber(cam_topic, 'sensor_msgs/CompressedImage');
 
-centerLaneTopic = ['/',veh_id, '/center_lane'];
-centerLane_sub = rossubscriber(centerLaneTopic, 'path_follower/lane');
+centerLaneRawTopic = ['/',veh_id, '/center_lane'];
+centerLaneRaw_sub = rossubscriber(centerLaneRawTopic, 'path_follower/lane');
+
+centerLaneAugTopic = ['/',veh_id, '/aug_center_lane'];
+centerLaneAug_sub = rossubscriber(centerLaneAugTopic, 'path_follower/lane');
 
 left_lane_topic = ['/',veh_id, '/left_lane'];
 left_lane_pub = rospublisher(left_lane_topic,'path_follower/lane');
@@ -54,7 +57,8 @@ msg = cam_sub.receive;
 frame = msg.readImage;
 rosout = rosout_sub.receive;
 
-centerLaneMsg = centerLane_sub.receive;
+centerLaneRawMsg = centerLaneRaw_sub.receive;
+centerLaneAugMsg = centerLaneAug_sub.receive;
 
 %% specify lane detection parameters
 distAheadOfSensor = 10; % in meters, as previously specified in monoCamera height input
@@ -158,7 +162,8 @@ if isempty(leftEgoBoundary)
         right_relative_yaw_angle = rightEgoBoundary.Parameters(3);
         right_lateral_deviation = rightEgoBoundary.Parameters(4);
         
-        centerEgoBoundary = rightEgoBoundary; %assign center lane to left lane;
+        centerEgoBoundaryRaw = rightEgoBoundary; %assign center lane to left lane;
+        centerEgoBoundaryAug = rightEgoBoundary;
         
 %         pack left lane values with zeros. Set strength to 0.
         disp('left lane not detected')
@@ -170,7 +175,7 @@ if isempty(leftEgoBoundary)
     else
 %         if both left and right lanes not detected continue
         disp('no lanes detected. continuing')
-        [birdsEyeWithEgoLane,frameWithEgoLane] = showLanes(birdsEyeImage,leftEgoBoundary,leftEgoBoundary,rightEgoBoundary,birdsEyeConfig,bottomOffset,distAheadOfSensor,frame,sensor);
+        [birdsEyeWithEgoLane,frameWithEgoLane] = showLanes(birdsEyeImage,leftEgoBoundary,leftEgoBoundary,rightEgoBoundary,rightEgoBoundary,birdsEyeConfig,bottomOffset,distAheadOfSensor,frame,sensor);
     %     clear centerEgoBoundary
         subplot('Position', [0, 0, 0.5, 1.0]) % [left, bottom, width, height] in normalized units
         imshow(birdsEyeWithEgoLane)
@@ -188,7 +193,8 @@ else
     left_relative_yaw_angle = leftEgoBoundary.Parameters(3);
     left_lateral_deviation = leftEgoBoundary.Parameters(4);
     
-    centerEgoBoundary = leftEgoBoundary; %assign center lane to left lane;
+    centerEgoBoundaryRaw = leftEgoBoundary; %assign center lane to left lane;
+    centerEgoBoundaryAug = leftEgoBoundary;
     
 %   get right lane values
     if ~isempty(rightEgoBoundary)
@@ -250,36 +256,47 @@ send(left_lane_pub, left_lane_msg)
 
 % %     sim('estimate_lane_center.slx')
 
-%% Running window filter for center lane
-centerRhoDot(i) = centerLaneMsg.RhoDot;
-centerRho(i) = centerLaneMsg.Rho;
-centerPhi(i) = centerLaneMsg.Phi;
-centerY(i) = centerLaneMsg.Y;
+%% Running window filter for center lane - Raw
+centerRhoDotRaw(i) = centerLaneRawMsg.RhoDot;
+centerRhoRaw(i) = centerLaneRawMsg.Rho;
+centerPhiRaw(i) = centerLaneRawMsg.Phi;
+centerYRaw(i) = centerLaneRawMsg.Y;
 
-meanRhoDot = movmean(centerRhoDot,moveAvWindow);
-meanRho = movmean(centerRho,moveAvWindow);
-meanPhi = movmean(centerPhi,moveAvWindow);
-meanY = movmean(centerY,moveAvWindow);
+meanRhoDotRaw = movmean(centerRhoDotRaw,moveAvWindow);
+meanRhoRaw = movmean(centerRhoRaw,moveAvWindow);
+meanPhiRaw = movmean(centerPhiRaw,moveAvWindow);
+meanYRaw = movmean(centerYRaw,moveAvWindow);
 
-centerEgoBoundary.Parameters(1) = meanRhoDot(i);
-centerEgoBoundary.Parameters(2) = meanRho(i);
-centerEgoBoundary.Parameters(3) = meanPhi(i);
-centerEgoBoundary.Parameters(4) = meanY(i);
+centerEgoBoundaryRaw.Parameters(1) = meanRhoDotRaw(i);
+centerEgoBoundaryRaw.Parameters(2) = meanRhoRaw(i);
+centerEgoBoundaryRaw.Parameters(3) = meanPhiRaw(i);
+centerEgoBoundaryRaw.Parameters(4) = meanYRaw(i);
 
+%% Running window filter for center lane - Raw
+centerRhoDotAug(i) = centerLaneAugMsg.RhoDot;
+centerRhoAug(i) = centerLaneAugMsg.Rho;
+centerPhiAug(i) = centerLaneAugMsg.Phi;
+centerYAug(i) = centerLaneAugMsg.Y;
 
-%     centerEgoBoundary.Parameters(1) = mean(center_curvature_derivative.Data);
-%     centerEgoBoundary.Parameters(2) = mean(center_curvature.Data(1,:));
-%     centerEgoBoundary.Parameters(3) = mean(center_relative_yaw_angle.Data);
-%     centerEgoBoundary.Parameters(4) = mean(center_lateral_deviation.Data);
-%     disp('CENTER lane params')
-%     disp(centerEgoBoundary.Parameters)
+meanRhoDotAug = movmean(centerRhoDotAug,moveAvWindow);
+meanRhoAug = movmean(centerRhoAug,moveAvWindow);
+meanPhiAug = movmean(centerPhiAug,moveAvWindow);
+meanYAug = movmean(centerYAug,moveAvWindow);
+
+centerEgoBoundaryAug.Parameters(1) = meanRhoDotAug(i);
+centerEgoBoundaryAug.Parameters(2) = meanRhoAug(i);
+centerEgoBoundaryAug.Parameters(3) = meanPhiAug(i);
+centerEgoBoundaryAug.Parameters(4) = meanYAug(i);
+
+%% Display the lanes
+
     
-    [birdsEyeWithEgoLane,frameWithEgoLane] = showLanes(birdsEyeImage,leftEgoBoundary,centerEgoBoundary,rightEgoBoundary,birdsEyeConfig,bottomOffset,distAheadOfSensor,frame,sensor);
+[birdsEyeWithEgoLane,frameWithEgoLane] = showLanes(birdsEyeImage,leftEgoBoundary,centerEgoBoundaryRaw,centerEgoBoundaryAug,rightEgoBoundary,birdsEyeConfig,bottomOffset,distAheadOfSensor,frame,sensor);
 %     clear centerEgoBoundary
-    subplot('Position', [0, 0, 0.5, 1.0]) % [left, bottom, width, height] in normalized units
-    imshow(birdsEyeWithEgoLane)
-    subplot('Position', [0.5, 0, 0.5, 1.0])
-    imshow(frameWithEgoLane)
+subplot('Position', [0, 0, 0.5, 1.0]) % [left, bottom, width, height] in normalized units
+imshow(birdsEyeWithEgoLane)
+subplot('Position', [0.5, 0, 0.5, 1.0])
+imshow(frameWithEgoLane)
     
 % else
 %     continue
@@ -288,16 +305,18 @@ i = i + 1;
 end
 %% supporting functions
 
-function [birdsEyeWithEgoLane,frameWithEgoLane] =showLanes(birdsEyeImage,leftEgoBoundary,centerEgoBoundary,rightEgoBoundary,birdsEyeConfig,bottomOffset,distAheadOfSensor,frame,sensor)
+function [birdsEyeWithEgoLane,frameWithEgoLane] =showLanes(birdsEyeImage,leftEgoBoundary,centerEgoBoundaryRaw,centerEgoBoundaryAug,rightEgoBoundary,birdsEyeConfig,bottomOffset,distAheadOfSensor,frame,sensor)
 
 xVehiclePoints = bottomOffset:distAheadOfSensor;
 birdsEyeWithEgoLane = insertLaneBoundary(birdsEyeImage, leftEgoBoundary , birdsEyeConfig, xVehiclePoints, 'Color','Red', 'LineWidth', 7);
-birdsEyeWithEgoLane = insertLaneBoundary(birdsEyeWithEgoLane, centerEgoBoundary, birdsEyeConfig, xVehiclePoints, 'Color','Yellow', 'LineWidth', 7);
+birdsEyeWithEgoLane = insertLaneBoundary(birdsEyeWithEgoLane, centerEgoBoundaryRaw, birdsEyeConfig, xVehiclePoints, 'Color','Yellow', 'LineWidth', 7);
 birdsEyeWithEgoLane = insertLaneBoundary(birdsEyeWithEgoLane, rightEgoBoundary, birdsEyeConfig, xVehiclePoints, 'Color','Green',  'LineWidth', 10);
+birdsEyeWithEgoLane = insertLaneBoundary(birdsEyeWithEgoLane, centerEgoBoundaryAug, birdsEyeConfig, xVehiclePoints, 'Color','Blue', 'LineWidth', 3);
 
 frameWithEgoLane = insertLaneBoundary(frame, leftEgoBoundary, sensor, xVehiclePoints, 'Color','Red',  'LineWidth', 10);
 frameWithEgoLane = insertLaneBoundary(frameWithEgoLane, rightEgoBoundary, sensor, xVehiclePoints, 'Color','Green',  'LineWidth', 10);
-frameWithEgoLane = insertLaneBoundary(frameWithEgoLane, centerEgoBoundary, sensor, xVehiclePoints, 'Color','Yellow',  'LineWidth', 10);
+frameWithEgoLane = insertLaneBoundary(frameWithEgoLane, centerEgoBoundaryRaw, sensor, xVehiclePoints, 'Color','Yellow',  'LineWidth', 7);
+frameWithEgoLane = insertLaneBoundary(frameWithEgoLane, centerEgoBoundaryAug, sensor, xVehiclePoints, 'Color','Blue',  'LineWidth', 3);
 end
 
 function imageROI = vehicleToImageROI(birdsEyeConfig, vehicleROI)
