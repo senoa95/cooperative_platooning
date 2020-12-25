@@ -50,6 +50,7 @@ center_lateral_deviation.Data = 0;
 %% Main Loop
 i = 1;
 moveAvWindow = 10;
+first = true;
 while true
 %% subscribe to compressed camera image
 
@@ -146,8 +147,50 @@ if ~isempty(minRDistance)
     rightEgoBoundaryIndex = distanceToBoundaries == minRDistance;
 end
 
-leftEgoBoundary       = boundaries(leftEgoBoundaryIndex);
-rightEgoBoundary      = boundaries(rightEgoBoundaryIndex);
+if first
+    leftEgoBoundary       = boundaries(leftEgoBoundaryIndex);
+    rightEgoBoundary      = boundaries(rightEgoBoundaryIndex);
+    prevLeftEgoBoundary = leftEgoBoundary;
+    prevRightEgoBoundary = rightEgoBoundary;
+    prevCenterRawEgoBoundary = leftEgoBoundary;
+    prevCenterAugEgoBoundary = leftEgoBoundary;
+    
+    prevLeftEgoBoundary(1).Parameters = [0,0,0,0];
+    prevLeftEgoBoundary(1).BoundaryType = 'Solid';
+    prevLeftEgoBoundary(1).Strength = 0;
+    prevLeftEgoBoundary(1).XExtent = [0, 0];
+    prevLeftEgoBoundary(1).Width = 0;
+
+    prevRightEgoBoundary(1).Parameters = [0,0,0,0];
+    prevRightEgoBoundary(1).BoundaryType = 'Solid';
+    prevRightEgoBoundary(1).Strength = 0;
+    prevRightEgoBoundary(1).XExtent = [0, 0];
+    prevRightEgoBoundary(1).Width = 0;
+    
+    prevCenterRawEgoBoundary(1).Parameters = [0,0,0,0];
+    prevCenterRawEgoBoundary(1).BoundaryType = 'Solid';
+    prevCenterRawEgoBoundary(1).Strength = 0;
+    prevCenterRawEgoBoundary(1).XExtent = [0, 0];
+    prevCenterRawEgoBoundary(1).Width = 0;
+
+    prevCenterAugEgoBoundary(1).Parameters = [0,0,0,0];
+    prevCenterAugEgoBoundary(1).BoundaryType = 'Solid';
+    prevCenterAugEgoBoundary(1).Strength = 0;
+    prevCenterAugEgoBoundary(1).XExtent = [0, 0];
+    prevCenterAugEgoBoundary(1).Width = 0;
+    
+    first = false;
+end
+
+leftEgoBoundary   = boundaries(leftEgoBoundaryIndex);
+rightEgoBoundary  = boundaries(rightEgoBoundaryIndex);
+
+if ~isempty(leftEgoBoundary)
+    prevLeftEgoBoundary = leftEgoBoundary;
+end
+if ~isempty(rightEgoBoundary)
+    prevRightEgoBoundary = rightEgoBoundary;
+end
 
 %% display left and right lane clothoid parameters
 
@@ -175,7 +218,7 @@ if isempty(leftEgoBoundary)
     else
 %         if both left and right lanes not detected continue
         disp('no lanes detected. continuing')
-        [birdsEyeWithEgoLane,frameWithEgoLane] = showLanes(birdsEyeImage,leftEgoBoundary,leftEgoBoundary,rightEgoBoundary,rightEgoBoundary,birdsEyeConfig,bottomOffset,distAheadOfSensor,frame,sensor);
+        [birdsEyeWithEgoLane,frameWithEgoLane] = showLanes(birdsEyeImage,prevLeftEgoBoundary,prevCenterRawEgoBoundary,prevCenterAugEgoBoundary,prevRightEgoBoundary,birdsEyeConfig,bottomOffset,distAheadOfSensor,frame,sensor);
     %     clear centerEgoBoundary
         subplot('Position', [0, 0, 0.5, 1.0]) % [left, bottom, width, height] in normalized units
         imshow(birdsEyeWithEgoLane)
@@ -289,8 +332,9 @@ centerEgoBoundaryAug.Parameters(3) = meanPhiAug(i);
 centerEgoBoundaryAug.Parameters(4) = meanYAug(i);
 
 %% Display the lanes
+prevCenterRawEgoBoundary = centerEgoBoundaryRaw;
+prevCenterAugEgoBoundary = centerEgoBoundaryAug;
 
-    
 [birdsEyeWithEgoLane,frameWithEgoLane] = showLanes(birdsEyeImage,leftEgoBoundary,centerEgoBoundaryRaw,centerEgoBoundaryAug,rightEgoBoundary,birdsEyeConfig,bottomOffset,distAheadOfSensor,frame,sensor);
 %     clear centerEgoBoundary
 subplot('Position', [0, 0, 0.5, 1.0]) % [left, bottom, width, height] in normalized units

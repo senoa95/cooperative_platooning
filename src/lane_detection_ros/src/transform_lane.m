@@ -82,7 +82,7 @@ while true
     
     %% Create augmented modified follower lanes
     [min_dist_to_lead(i), min_dist_index] = min(sqrt(([lead_lane_struct.pos.x] - [follow_lane_struct.pos(i).x]).^2 +...
-        ([lead_lane_struct.pos.y] - [follow_lane_struct.pos(i).y]).^2))
+        ([lead_lane_struct.pos.y] - [follow_lane_struct.pos(i).y]).^2));
     
     if plotPose
         figure(1)
@@ -94,10 +94,9 @@ while true
         ylabel('Latitude')
     end
     
-     if min_dist_to_lead(i) <= maxDistToAugment
+     if min_dist_to_lead(i) <= maxDistToAugment && lead_lane_struct.lane(min_dist_index).Strength >= 40
         num_long = 150;
         follow_lane_struct.augLane(i) = lead_lane_struct.lane(min_dist_index);
-        follow_lane_struct.augLane(i).Y = follow_lane_struct.lane(min_dist_index).Y;
         lead_lane_struct.compiledLane.longitudinal = linspace(0,50,num_long);
         rangeIdx = 1;
         longRange = zeros(1,num_long);
@@ -107,22 +106,21 @@ while true
             tempLateral(rangeIdx) = compute_lateral(lead_lane_struct.lane(min_dist_index),currRange);
             rangeIdx = rangeIdx + 1;
         end
-        deltaYaw = deg2rad(-lead_inspva_msg.Azimuth + follow_inspva_msg.Azimuth);
-        rotatedLane = rotateLane(tempLateral,longRange,deltaYaw);
-        f = fit(longRange', rotatedLane.lateral', 'poly3');
-        follow_lane_struct.augLane(i).Phi = f.p3;
+        deltaYaw = deg2rad(lead_inspva_msg.Azimuth - follow_inspva_msg.Azimuth);
+        rotatedLane = rotateLane(longRange,tempLateral,deltaYaw);
+        f = fit(rotatedLane.lateral',longRange', 'poly3');
+        follow_lane_struct.augLane(i).Y = follow_lane_struct.lane(i).Y;
+        follow_lane_struct.augLane(i).Phi = deg2rad(f.p3);
         follow_aug_lane_flag.Data = 1;
         aug_lane_flag(i) = 1;
      else
-         follow_lane_struct.augLane(i) = follow_lane_struct.lane(min_dist_index);
+         follow_lane_struct.augLane(i) = follow_lane_struct.lane(i);
          follow_aug_lane_flag.Data = 0;
          aug_lane_flag(i) = 0;
      end
      send(follow_aug_lane_pub, follow_lane_struct.augLane(i))
      send(follow_aug_lane_flag_pub, follow_aug_lane_flag)
      time(i) = rosout.Header.Stamp.seconds;
-     
-     
         
         %     subplot('Position', [0, 0, 0.5, 1.0]) % [left, bottom, width, height] in normalized units
 %     imshow(birdsEyeWithEgoLane)
@@ -135,14 +133,14 @@ end
 
 
 %% Rotation
-function  rotatedLane = rotateLane(LeadLaneLateral,LeadLaneLongitudinal,relativeHeading)
+function  rotatedLane = rotateLane(laneLateral,laneLongitudinal,relativeHeading)
 rotationMtrx = [cos(relativeHeading) -sin(relativeHeading) ; sin(relativeHeading) cos(relativeHeading)];
-rotatedLane_temp= rotationMtrx * [LeadLaneLongitudinal; LeadLaneLateral];
+rotatedLane_temp= rotationMtrx * [laneLongitudinal; laneLateral];
 rotatedLane.lateral = rotatedLane_temp(2,:);
 rotatedLane.longitudinal = rotatedLane_temp(1,:);
 end
 
 function lateral_val = compute_lateral(lane_struct,currRange)
-lateral_val = lane_struct.Y + lane_struct.Phi*currRange*(2*pi / 360) + lane_struct.Rho*currRange^2 *(0.5/ 1000)...
+lateral_val = lane_struct.Y + deg2rad(lane_struct.Phi*currRange) + lane_struct.Rho*currRange^2 *(0.5/ 1000)...
                     + lane_struct.RhoDot*currRange^3*(0.16667 / (1000^2));
 end

@@ -47,6 +47,7 @@ center_lateral_deviation.Data = 0;
 %% Main Loop
 i = 1;
 moveAvWindow = 10;
+first = true;
 while true
 %% subscribe to compressed camera image
 
@@ -142,9 +143,18 @@ if ~isempty(minRDistance)
     rightEgoBoundaryIndex = distanceToBoundaries == minRDistance;
 end
 
-leftEgoBoundary       = boundaries(leftEgoBoundaryIndex);
-rightEgoBoundary      = boundaries(rightEgoBoundaryIndex);
-
+if first
+    leftEgoBoundary = boundaries(leftEgoBoundaryIndex);
+    rightEgoBoundary = boundaries(rightEgoBoundaryIndex);
+    prevLeftEgoBoundary = leftEgoBoundary;
+    prevRightEgoBoundary = rightEgoBoundary;
+    first = false;
+else
+    prevLeftEgoBoundary = leftEgoBoundary;
+    prevRightEgoBoundary = rightEgoBoundary;
+    leftEgoBoundary   = boundaries(leftEgoBoundaryIndex);
+    rightEgoBoundary  = boundaries(rightEgoBoundaryIndex);
+end
 %% display left and right lane clothoid parameters
 
 if isempty(leftEgoBoundary)
