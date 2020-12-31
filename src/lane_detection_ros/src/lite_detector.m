@@ -19,21 +19,22 @@ sensor = monoCamera(camIntrinsics, height, 'Pitch', pitch);
 %% initialize matlab ros node
 rosshutdown
 rosinit
+vis_node = ros.Node('lead_lane_vis','localhost');
 
-rosout_sub = rossubscriber('rosout');
+rosout_sub = ros.Subscriber(vis_node,'rosout');
 
 cam_topic = ['/', veh_id, '_cam/image_raw/compressed'];
-cam_sub = rossubscriber(cam_topic, 'sensor_msgs/CompressedImage');
+cam_sub = ros.Subscriber(vis_node,cam_topic, 'sensor_msgs/CompressedImage');
 
 centerLaneTopic = ['/',veh_id, '/center_lane'];
-centerLane_sub = rossubscriber(centerLaneTopic, 'path_follower/lane');
+centerLane_sub = ros.Subscriber(vis_node,centerLaneTopic, 'path_follower/lane');
 
 left_lane_topic = ['/',veh_id, '/left_lane'];
-left_lane_pub = rospublisher(left_lane_topic,'path_follower/lane');
+left_lane_pub = ros.Publisher(vis_node,left_lane_topic,'path_follower/lane');
 left_lane_msg = rosmessage(left_lane_pub);
 
 right_lane_topic = ['/',veh_id, '/right_lane'];
-right_lane_pub = rospublisher(right_lane_topic,'path_follower/lane');
+right_lane_pub = ros.Publisher(vis_node,right_lane_topic,'path_follower/lane');
 right_lane_msg = rosmessage(right_lane_pub);
 
 %% Initialize Lane Center Detector Values

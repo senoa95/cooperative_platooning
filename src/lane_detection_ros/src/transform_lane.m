@@ -2,8 +2,8 @@ close all
 clear
 clc
 
-lead_veh_id = 'trex2';
-follow_veh_id = 'trex';
+lead_veh_id = 'trex';
+follow_veh_id = 'trex2';
 
 i = 1;
 maxDistToAugment = 2;
@@ -14,43 +14,42 @@ PredictionHorizon = 2;
 lead_lane_struct = struct();
 follow_lane_struct = struct();
 %% Initialize Ros
-
-if ros.internal.Global.isNodeActive == 0
-    rosinit
-end
+rosshutdown
+rosinit
+lane_augment = ros.Node('lane_augment','localhost');
 
 pause(0.5)
 
-rosout_sub = rossubscriber('rosout');
+rosout_sub = ros.Subscriber(lane_augment,'rosout');
 
 lead_center_lane_topic = ['/',lead_veh_id, '/center_lane'];
-lead_center_lane_sub = rossubscriber(lead_center_lane_topic, 'path_follower/lane');
+lead_center_lane_sub = ros.Subscriber(lane_augment,lead_center_lane_topic, 'path_follower/lane');
 
 lead_inspva_topic = ['/',lead_veh_id, '/inspva'];
-lead_inspva_sub = rossubscriber(lead_inspva_topic,'novatel_gps_msgs/Inspva');
+lead_inspva_sub = ros.Subscriber(lane_augment,lead_inspva_topic,'novatel_gps_msgs/Inspva');
 
 lead_fix_topic = ['/',lead_veh_id, '/fix'];
-lead_fix_sub = rossubscriber(lead_fix_topic, 'sensor_msgs/NavSatFix');
+lead_fix_sub = ros.Subscriber(lane_augment,lead_fix_topic, 'sensor_msgs/NavSatFix');
 
 follow_center_lane_topic = ['/',follow_veh_id, '/center_lane'];
-follow_center_lane_sub = rossubscriber(follow_center_lane_topic, 'path_follower/lane');
+follow_center_lane_sub = ros.Subscriber(lane_augment,follow_center_lane_topic, 'path_follower/lane');
 
 follow_inspva_topic = ['/',follow_veh_id, '/inspva'];
-follow_inspva_sub = rossubscriber(follow_inspva_topic, 'novatel_gps_msgs/Inspva');
+follow_inspva_sub = ros.Subscriber(lane_augment,follow_inspva_topic, 'novatel_gps_msgs/Inspva');
 
 follow_fix_topic = ['/',follow_veh_id, '/fix'];
-follow_fix_sub = rossubscriber(follow_fix_topic, 'sensor_msgs/NavSatFix');
+follow_fix_sub = ros.Subscriber(lane_augment,follow_fix_topic, 'sensor_msgs/NavSatFix');
 
 follow_cam_topic = ['/', follow_veh_id, '_cam/image_raw/compressed'];
-follow_cam_sub = rossubscriber(follow_cam_topic, 'sensor_msgs/CompressedImage');
+follow_cam_sub = ros.Subscriber(lane_augment,follow_cam_topic, 'sensor_msgs/CompressedImage');
 init_lead_pos_lat = 0;
 
 follow_aug_lane_topic = ['/',follow_veh_id,'/aug_center_lane'];
-follow_aug_lane_pub = rospublisher(follow_aug_lane_topic, 'path_follower/lane');
+follow_aug_lane_pub = ros.Publisher(lane_augment,follow_aug_lane_topic, 'path_follower/lane');
 follow_aug_lane = rosmessage(follow_aug_lane_pub);
 
 follow_aug_lane_flag_topic = ['/',follow_veh_id,'/aug_center_lane/flag'];
-follow_aug_lane_flag_pub = rospublisher(follow_aug_lane_flag_topic, 'std_msgs/Float32');
+follow_aug_lane_flag_pub = ros.Publisher(lane_augment,follow_aug_lane_flag_topic, 'std_msgs/Float32');
 follow_aug_lane_flag = rosmessage(follow_aug_lane_flag_pub);
 
 %% Run center lane compute

@@ -2,7 +2,7 @@ close all
 clear
 clc
 
-veh_id = 'trex';
+veh_id = 'trex2';
 %% initialize camara intrinsics
 % focalLength = cameraParams.FocalLength;
 % principalPoint = cameraParams.PrincipalPoint;
@@ -19,25 +19,30 @@ sensor = monoCamera(camIntrinsics, height, 'Pitch', pitch);
 %% initialize matlab ros node
 rosshutdown
 rosinit
+vis_node = ros.Node('follow_lane_vis','localhost');
+% ros.Node('augmented_lane_vis');
 
-rosout_sub = rossubscriber('rosout');
+rosout_sub = ros.Subscriber(vis_node,'rosout');
 
 cam_topic = ['/', veh_id, '_cam/image_raw/compressed'];
-cam_sub = rossubscriber(cam_topic, 'sensor_msgs/CompressedImage');
+cam_sub = ros.Subscriber(vis_node, cam_topic, 'sensor_msgs/CompressedImage');
 
 centerLaneRawTopic = ['/',veh_id, '/center_lane'];
-centerLaneRaw_sub = rossubscriber(centerLaneRawTopic, 'path_follower/lane');
+centerLaneRaw_sub =ros.Subscriber(vis_node,centerLaneRawTopic, 'path_follower/lane');
 
 centerLaneAugTopic = ['/',veh_id, '/aug_center_lane'];
-centerLaneAug_sub = rossubscriber(centerLaneAugTopic, 'path_follower/lane');
+centerLaneAug_sub = ros.Subscriber(vis_node,centerLaneAugTopic, 'path_follower/lane');
 
 left_lane_topic = ['/',veh_id, '/left_lane'];
-left_lane_pub = rospublisher(left_lane_topic,'path_follower/lane');
+left_lane_pub = ros.Publisher(vis_node, left_lane_topic,'path_follower/lane');
 left_lane_msg = rosmessage(left_lane_pub);
 
 right_lane_topic = ['/',veh_id, '/right_lane'];
-right_lane_pub = rospublisher(right_lane_topic,'path_follower/lane');
+right_lane_pub = ros.Publisher(vis_node,right_lane_topic,'path_follower/lane');
 right_lane_msg = rosmessage(right_lane_pub);
+
+augCheckFlag_topic = ['/',veh_id,'/aug_center_lane/flag'];
+augCheckFlag_sub = ros.Subscriber(vis_node,augCheckFlag_topic, 'std_msgs/Float32');
 
 %% Initialize Lane Center Detector Values
 Ts = 0.1;
@@ -57,6 +62,7 @@ while true
 msg = cam_sub.receive;
 frame = msg.readImage;
 rosout = rosout_sub.receive;
+augLaneCheckFlag = augCheckFlag_sub.receive;
 
 centerLaneRawMsg = centerLaneRaw_sub.receive;
 centerLaneAugMsg = centerLaneAug_sub.receive;
@@ -80,6 +86,13 @@ birdsEyeImage = rgb2gray(birdsEyeImage);
 % Lane marker segmentation ROI in world units
 vehicleROI = outView - [0, 0, -0.1, 0.1]; % look 3 meters to left and right, and 4 meters ahead of the sensor
 approxLaneMarkerWidthVehicle = 0.2; % centimeters
+
+%% Check for augmentation of lane
+if augLaneCheckFlag.Data == 1
+    augLaneColor = 'Magenta';
+else
+    augLaneColor = 'Yellow'; % indicates no augmentation
+end
 
 %% detect lane 
 % Detect lane features
@@ -218,7 +231,7 @@ if isempty(leftEgoBoundary)
     else
 %         if both left and right lanes not detected continue
         disp('no lanes detected. continuing')
-        [birdsEyeWithEgoLane,frameWithEgoLane] = showLanes(birdsEyeImage,prevLeftEgoBoundary,prevCenterRawEgoBoundary,prevCenterAugEgoBoundary,prevRightEgoBoundary,birdsEyeConfig,bottomOffset,distAheadOfSensor,frame,sensor);
+        [birdsEyeWithEgoLane,frameWithEgoLane] = showLanes(birdsEyeImage,prevLeftEgoBoundary,prevCenterRawEgoBoundary,prevCenterAugEgoBoundary,prevRightEgoBoundary,birdsEyeConfig,bottomOffset,distAheadOfSensor,frame,sensor,augLaneColor);
     %     clear centerEgoBoundary
         subplot('Position', [0, 0, 0.5, 1.0]) % [left, bottom, width, height] in normalized units
         imshow(birdsEyeWithEgoLane)
@@ -335,7 +348,11 @@ centerEgoBoundaryAug.Parameters(4) = meanYAug(i);
 prevCenterRawEgoBoundary = centerEgoBoundaryRaw;
 prevCenterAugEgoBoundary = centerEgoBoundaryAug;
 
-[birdsEyeWithEgoLane,frameWithEgoLane] = showLanes(birdsEyeImage,leftEgoBoundary,centerEgoBoundaryRaw,centerEgoBoundaryAug,rightEgoBoundary,birdsEyeConfig,bottomOffset,distAheadOfSensor,frame,sensor);
+% force solid lane line types
+centerEgoBoundaryRaw.BoundaryType = 'Solid';
+centerEgoBoundaryAug.BoundaryType = 'Solid';
+
+[birdsEyeWithEgoLane,frameWithEgoLane] = showLanes(birdsEyeImage,leftEgoBoundary,centerEgoBoundaryRaw,centerEgoBoundaryAug,rightEgoBoundary,birdsEyeConfig,bottomOffset,distAheadOfSensor,frame,sensor,augLaneColor);
 %     clear centerEgoBoundary
 subplot('Position', [0, 0, 0.5, 1.0]) % [left, bottom, width, height] in normalized units
 imshow(birdsEyeWithEgoLane)
@@ -349,18 +366,18 @@ i = i + 1;
 end
 %% supporting functions
 
-function [birdsEyeWithEgoLane,frameWithEgoLane] =showLanes(birdsEyeImage,leftEgoBoundary,centerEgoBoundaryRaw,centerEgoBoundaryAug,rightEgoBoundary,birdsEyeConfig,bottomOffset,distAheadOfSensor,frame,sensor)
+function [birdsEyeWithEgoLane,frameWithEgoLane] =showLanes(birdsEyeImage,leftEgoBoundary,centerEgoBoundaryRaw,centerEgoBoundaryAug,rightEgoBoundary,birdsEyeConfig,bottomOffset,distAheadOfSensor,frame,sensor,augLaneColor)
 
 xVehiclePoints = bottomOffset:distAheadOfSensor;
 birdsEyeWithEgoLane = insertLaneBoundary(birdsEyeImage, leftEgoBoundary , birdsEyeConfig, xVehiclePoints, 'Color','Red', 'LineWidth', 7);
-birdsEyeWithEgoLane = insertLaneBoundary(birdsEyeWithEgoLane, centerEgoBoundaryRaw, birdsEyeConfig, xVehiclePoints, 'Color','Yellow', 'LineWidth', 7);
+birdsEyeWithEgoLane = insertLaneBoundary(birdsEyeWithEgoLane, centerEgoBoundaryRaw, birdsEyeConfig, xVehiclePoints, 'Color','Yellow', 'LineWidth', 5);
 birdsEyeWithEgoLane = insertLaneBoundary(birdsEyeWithEgoLane, rightEgoBoundary, birdsEyeConfig, xVehiclePoints, 'Color','Green',  'LineWidth', 10);
-birdsEyeWithEgoLane = insertLaneBoundary(birdsEyeWithEgoLane, centerEgoBoundaryAug, birdsEyeConfig, xVehiclePoints, 'Color','Blue', 'LineWidth', 3);
+birdsEyeWithEgoLane = insertLaneBoundary(birdsEyeWithEgoLane, centerEgoBoundaryAug, birdsEyeConfig, xVehiclePoints, 'Color',augLaneColor, 'LineWidth', 10);
 
 frameWithEgoLane = insertLaneBoundary(frame, leftEgoBoundary, sensor, xVehiclePoints, 'Color','Red',  'LineWidth', 10);
 frameWithEgoLane = insertLaneBoundary(frameWithEgoLane, rightEgoBoundary, sensor, xVehiclePoints, 'Color','Green',  'LineWidth', 10);
-frameWithEgoLane = insertLaneBoundary(frameWithEgoLane, centerEgoBoundaryRaw, sensor, xVehiclePoints, 'Color','Yellow',  'LineWidth', 7);
-frameWithEgoLane = insertLaneBoundary(frameWithEgoLane, centerEgoBoundaryAug, sensor, xVehiclePoints, 'Color','Blue',  'LineWidth', 3);
+frameWithEgoLane = insertLaneBoundary(frameWithEgoLane, centerEgoBoundaryRaw, sensor, xVehiclePoints, 'Color','Yellow',  'LineWidth', 5);
+frameWithEgoLane = insertLaneBoundary(frameWithEgoLane, centerEgoBoundaryAug, sensor, xVehiclePoints, 'Color',augLaneColor,  'LineWidth', 10);
 end
 
 function imageROI = vehicleToImageROI(birdsEyeConfig, vehicleROI)
